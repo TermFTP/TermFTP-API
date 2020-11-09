@@ -20,15 +20,12 @@ public class PersonController {
 
     @PostMapping(path = "")
     public String addPerson(@RequestBody Person person){
-        System.out.println("adding person");
         personService.addPerson(person);
         return "Success";
     }
 
-
     @GetMapping(path = "/test")
     public String someTest(){
-        System.out.println("working");
         return "wurking";
     }
 
@@ -36,6 +33,7 @@ public class PersonController {
     public List<Person> getAllPeople(){
         return personService.getAllPeople();
     }
+
 
     @GetMapping(path = "/getPerson/{id}")
     public Person getPersonByID(@PathVariable("id") UUID id){
