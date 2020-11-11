@@ -1,3 +1,18 @@
+-- SEQUENCE: public."Setting_setting_id_seq"
+
+-- DROP SEQUENCE public."Setting_setting_id_seq";
+
+CREATE SEQUENCE public."Setting_setting_id_seq"
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 999999999
+    CACHE 1;
+
+ALTER SEQUENCE public."Setting_setting_id_seq"
+    OWNER TO postgres;
+
+
 -- Table: public.users
 
 -- DROP TABLE public.users;
