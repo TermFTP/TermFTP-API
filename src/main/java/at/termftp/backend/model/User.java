@@ -1,5 +1,7 @@
 package at.termftp.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -33,6 +35,16 @@ public class User {
         this.email = email;
         this.password = password;
         this.verified = verified;
+    }
+
+    public User(@JsonProperty("username") String username,
+                @JsonProperty("email") String email,
+                @JsonProperty("password") String password) {
+        this.userID = UUID.randomUUID();
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.verified = false;
     }
 
     public User() {
