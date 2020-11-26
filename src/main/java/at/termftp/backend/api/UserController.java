@@ -1,7 +1,7 @@
 package at.termftp.backend.api;
 
-import at.termftp.backend.dao.UserRepository;
 import at.termftp.backend.model.User;
+import at.termftp.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,21 +12,27 @@ import java.util.UUID;
 @RestController
 public class UserController {
 
+    private final UserService userService;
+
     @Autowired
-    private UserRepository userRepository;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping(path = "/getUser/{id}")
     public User getUserByID(@PathVariable("id") UUID userID){
-        return userRepository.findById(userID).orElse(null);
+        return userService.getUserById(userID);
     }
+
 
     @GetMapping(path = "/getUsers")
     public List<User> getAllUsers(){
-        return userRepository.findAll();
+        return userService.getAllUsers();
     }
+
 
     @PostMapping(path = "/register")
     public User createUser(@RequestBody User user){
-        return userRepository.save(user);
+        return userService.createUser(user);
     }
 }
