@@ -1,6 +1,8 @@
 package at.termftp.backend.service;
 
+import at.termftp.backend.dao.ErrorMessages;
 import at.termftp.backend.dao.UserRepository;
+import at.termftp.backend.model.Error;
 import at.termftp.backend.model.User;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +18,9 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User getUserById(UUID userID){
-        return userRepository.findById(userID).orElse(null);
+    public Object getUserById(UUID userID){
+        User user = userRepository.findById(userID).orElse(null);
+        return user != null ? user : new Error(400, "Bad Request", ErrorMessages.getInvalidUserID());
     }
 
     public List<User> getAllUsers(){
@@ -28,8 +31,9 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User getUserByName(String username){
-        return userRepository.findUserByUsername(username).orElse(null);
+    public Object getUserByName(String username){
+        User user = userRepository.findUserByUsername(username).orElse(null);
+        return user != null ? user : new Error(400, "Bad Request", ErrorMessages.getInvalidUsername());
     }
 
 }

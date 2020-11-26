@@ -1,6 +1,5 @@
 package at.termftp.backend.api;
 
-import at.termftp.backend.model.AccessToken;
 import at.termftp.backend.model.Login;
 import at.termftp.backend.service.AccessTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,12 @@ public class AccessController {
         this.accessTokenService = accessTokenService;
     }
 
+
+    /**
+     * This method returns an AccessToken or an Error if the login failed
+     * @param login
+     * @return AccessToken or Error
+     */
     @PostMapping(path = "/login")
     public Object login(@RequestBody Login login){
         return accessTokenService.createAndOrGetAccessToken(login);

@@ -1,6 +1,7 @@
 package at.termftp.backend.service;
 
 import at.termftp.backend.dao.AccessTokenRepository;
+import at.termftp.backend.dao.ErrorMessages;
 import at.termftp.backend.model.AccessToken;
 import at.termftp.backend.model.Error;
 import at.termftp.backend.model.Login;
@@ -22,18 +23,33 @@ public class AccessTokenService {
         this.userService = userService;
     }
 
+    /**
+     * This methods checks whether an access token has expired or not
+     * @param accessToken
+     * @return true if the access token is still valid
+     */
     private boolean isValid(AccessToken accessToken){
         return accessToken.getGueltigBis().isAfter(LocalDate.now());
     }
 
 
+    /**
+     * This method validates the user (login) and creates/updates the access token
+     * @param login
+     * @return AccessToken or Error
+     */
     public Object createAndOrGetAccessToken(Login login){
 
-        User user = userService.getUserByName(login.getUsername());
+        Object userOrError = userService.getUserByName(login.getUsername());
+        User user;
+        if(userOrError instanceof User){
+            user = (User)userOrError;
+        }else{
+            return userOrError;
+        }
 
-
-        if(user == null || !user.getPassword().equals(login.getPassword())){
-            return new Error(401, "Unauthorized", "Invalid Username or Password");
+        if(!user.getPassword().equals(login.getPassword())){
+            return new Error(401, "Unauthorized", ErrorMessages.getInvalidPassword());
         }
 
         AccessToken accessToken = accessTokenRepository.findAccessTokenByUserID(user.getUserID()).orElse(null);
@@ -56,6 +72,10 @@ public class AccessTokenService {
         return accessTokenRepository.save(accessToken);
     }
 
+    /**
+     * This method returns a list of all access tokens
+     * @return List of access tokens
+     */
     public List<AccessToken> getAllAccessTokens(){
         return accessTokenRepository.findAll();
     }
