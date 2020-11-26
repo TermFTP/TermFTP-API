@@ -15,8 +15,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/", "/api/v1/person/test1")
                 .permitAll()
                 .and()*/
+        http.csrf().disable();
 
-         http.csrf().disable();
     }
 
     @Override

@@ -28,4 +28,8 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User getUserByName(String username){
+        return userRepository.findUserByUsername(username).orElse(null);
+    }
+
 }
