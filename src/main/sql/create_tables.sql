@@ -185,3 +185,26 @@ ALTER TABLE public.access_tokens
     OWNER to postgres;
 
 
+
+
+-- Table: public.confirmation_tokens
+
+-- DROP TABLE public.confirmation_tokens;
+
+CREATE TABLE public.confirmation_tokens
+(
+    token character varying(256) COLLATE pg_catalog."default" NOT NULL,
+    user_id uuid NOT NULL,
+    gueltig_bis date,
+    CONSTRAINT confirmation_tokens_user_id_fkey FOREIGN KEY (user_id)
+        REFERENCES public.users (user_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+    TABLESPACE pg_default;
+
+ALTER TABLE public.confirmation_tokens
+    OWNER to postgres;
+
+

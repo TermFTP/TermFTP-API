@@ -1,17 +1,16 @@
 package at.termftp.backend.api;
 
 import at.termftp.backend.dao.ErrorMessages;
-import at.termftp.backend.model.AccessToken;
-import at.termftp.backend.model.Login;
+import at.termftp.backend.model.*;
 import at.termftp.backend.model.Error;
-import at.termftp.backend.model.User;
 import at.termftp.backend.service.AccessTokenService;
+import at.termftp.backend.service.ConfirmationTokenService;
+import at.termftp.backend.service.EmailSenderService;
 import at.termftp.backend.service.UserService;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,11 +22,15 @@ public class UserController {
 
     private final UserService userService;
     private final AccessTokenService accessTokenService;
+    private final ConfirmationTokenService confirmationTokenService;
+    private final EmailSenderService emailSenderService;
 
     @Autowired
-    public UserController(UserService userService, AccessTokenService accessTokenService) {
+    public UserController(UserService userService, AccessTokenService accessTokenService, ConfirmationTokenService confirmationTokenService, EmailSenderService emailSenderService) {
         this.userService = userService;
         this.accessTokenService = accessTokenService;
+        this.confirmationTokenService = confirmationTokenService;
+        this.emailSenderService = emailSenderService;
     }
 
 
@@ -68,6 +71,19 @@ public class UserController {
         User createdUser = null;
         try{
             createdUser = userService.createUser(user);
+            ConfirmationToken confirmationToken = confirmationTokenService.createAndGetConfirmationToken(user.getUserID());
+
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+            mailMessage.setTo(user.getEmail());
+            mailMessage.setSubject("Complete Registration");
+            mailMessage.setFrom("termftp.gmail.com");
+            String text = "To confirm your account, please click the following link: "
+                    + "http://localhost:8080/api/v1/confirm-account?token="
+                    + confirmationToken.getToken();
+            mailMessage.setText(text);
+
+            emailSenderService.sendEmail(mailMessage);
+
 
         }catch(DataIntegrityViolationException ex){
             String message =  ex.getMostSpecificCause().getMessage();
@@ -77,5 +93,13 @@ public class UserController {
                             : ErrorMessages.getDuplicateEmail());
         }
         return createdUser;
+    }
+
+    @GetMapping(path = "/confirm-account")
+    public boolean verify(@RequestParam("token") String confirmationToken){
+        if(confirmationToken == null || confirmationToken.length() <= 0){
+            return false;
+        }
+        return confirmationTokenService.validate(confirmationToken);
     }
 }
