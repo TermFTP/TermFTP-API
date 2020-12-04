@@ -19,10 +19,20 @@ public class ConfirmationTokenService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * used to create a confirmation token
+     * @param userID
+     * @return the confirmation token
+     */
     public ConfirmationToken createAndGetConfirmationToken(UUID userID){
         return confirmationTokenRepository.save(new ConfirmationToken(userID));
     }
 
+    /**
+     * this method validates the confirmation token of a user (after registration)
+     * @param token
+     * @return true if the token is valid
+     */
     public boolean validate(String token){
         ConfirmationToken confirmationToken = confirmationTokenRepository.findConfirmationTokenByToken(token).orElse(null);
         if(confirmationToken == null){

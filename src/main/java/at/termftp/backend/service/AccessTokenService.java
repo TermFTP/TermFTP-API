@@ -40,18 +40,18 @@ public class AccessTokenService {
      */
     public Object createAndOrGetAccessToken(Login login){
 
-        Object userOrError = userService.getUserByName(login.getUsername());
-        User user;
-        if(userOrError instanceof User){
-            user = (User)userOrError;
-        }else{
-            return userOrError;
+        // get the user by username
+        User user = userService.getUserByName(login.getUsername());
+        if(user == null){
+            return new Error(400, "Bad Request", ErrorMessages.getInvalidUsername());
         }
 
+        // check password
         if(!user.getPassword().equals(login.getPassword())){
             return new Error(401, "Unauthorized", ErrorMessages.getInvalidPassword());
         }
 
+        // check if user has already an access token
         AccessToken accessToken = accessTokenRepository.findAccessTokenByUserID(user.getUserID()).orElse(null);
 
         if(accessToken != null && isValid(accessToken)){
@@ -64,6 +64,7 @@ public class AccessTokenService {
             return accessTokenRepository.save(accessToken);
         }
 
+        // create a new access token
         System.out.println("Creating AccessToken");
         LocalDate expirationDate = LocalDate.now().plusDays(1);
         accessToken = new AccessToken(user.getUserID(), expirationDate, login.getPcName());

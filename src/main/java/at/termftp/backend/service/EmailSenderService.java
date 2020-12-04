@@ -15,6 +15,10 @@ public class EmailSenderService {
         this.javaMailSender = javaMailSender;
     }
 
+    /**
+     * this method actually sends the email
+     * @param email
+     */
     @Async
     public void sendEmail(SimpleMailMessage email){
         javaMailSender.send(email);

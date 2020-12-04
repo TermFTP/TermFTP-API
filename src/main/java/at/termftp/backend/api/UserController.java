@@ -48,7 +48,8 @@ public class UserController {
             return new Error(400, "Bad Request", ErrorMessages.getInvalidUserID());
         }
 
-        return userService.getUserById(id);
+        User user = userService.getUserById(id);
+        return user != null ? user : new Error(400, "Bad Request", ErrorMessages.getInvalidUserID());
     }
 
 
@@ -95,11 +96,33 @@ public class UserController {
         return createdUser;
     }
 
+    /**
+     * Tis method verifies a user when he click the link in the email
+     * @param confirmationToken
+     * @return true if the user was verified successfully
+     */
     @GetMapping(path = "/confirm-account")
     public boolean verify(@RequestParam("token") String confirmationToken){
         if(confirmationToken == null || confirmationToken.length() <= 0){
             return false;
         }
         return confirmationTokenService.validate(confirmationToken);
+    }
+
+
+    /**
+     * used to delete a single user by an ID
+     * @param userID
+     * @return number of deleted users (int) or an error (Error)
+     */
+    @DeleteMapping(path = "/deleteUser/{id}")
+    public Object deleteUser(@PathVariable("id") String userID){
+        UUID id;
+        try{
+            id = UUID.fromString(userID);
+            return userService.deleteUser(id);
+        }catch (IllegalArgumentException ex){
+            return new Error(400, "Bad Request", ErrorMessages.getInvalidUserID());
+        }
     }
 }
