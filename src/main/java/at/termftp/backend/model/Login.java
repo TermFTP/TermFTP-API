@@ -12,7 +12,7 @@ public class Login {
 
     public Login(@JsonProperty("username") String username,
                  @JsonProperty("password") String password,
-                 @JsonProperty("pc_name") String pcName) {
+                 @JsonProperty("pcName") String pcName) {
         this.username = username;
         this.password = password;
         this.pcName = pcName;
