@@ -3,19 +3,19 @@ package at.termftp.backend.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Error {
-    private int statusCode;
+    private int status;
     private String title;
-    private String errorMessage;
+    private String message;
 
     public Error() {
     }
 
-    public Error(@JsonProperty("statusCode") int statusCode,
+    public Error(@JsonProperty("status") int status,
                  @JsonProperty("title") String title,
-                 @JsonProperty("errorMessage") String errorMessage) {
-        this.statusCode = statusCode;
+                 @JsonProperty("message") String message) {
+        this.status = status;
         this.title = title;
-        this.errorMessage = errorMessage;
+        this.message = message;
     }
 
 
@@ -26,34 +26,34 @@ public class Error {
 
         Error error = (Error) o;
 
-        if (statusCode != error.statusCode) return false;
+        if (status != error.status) return false;
         if (title != null ? !title.equals(error.title) : error.title != null) return false;
-        return errorMessage != null ? errorMessage.equals(error.errorMessage) : error.errorMessage == null;
+        return message != null ? message.equals(error.message) : error.message == null;
     }
 
     @Override
     public int hashCode() {
-        int result = statusCode;
+        int result = status;
         result = 31 * result + (title != null ? title.hashCode() : 0);
-        result = 31 * result + (errorMessage != null ? errorMessage.hashCode() : 0);
+        result = 31 * result + (message != null ? message.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "Error{" +
-                "statusCode=" + statusCode +
+                "statusCode=" + status +
                 ", title='" + title + '\'' +
-                ", errorMessage='" + errorMessage + '\'' +
+                ", errorMessage='" + message + '\'' +
                 '}';
     }
 
-    public int getStatusCode() {
-        return statusCode;
+    public int getStatus() {
+        return status;
     }
 
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public String getTitle() {
@@ -64,11 +64,11 @@ public class Error {
         this.title = title;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    public String getMessage() {
+        return message;
     }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

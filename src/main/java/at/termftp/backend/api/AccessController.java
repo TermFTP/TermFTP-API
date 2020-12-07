@@ -1,8 +1,11 @@
 package at.termftp.backend.api;
 
+import at.termftp.backend.model.Error;
 import at.termftp.backend.model.Login;
 import at.termftp.backend.service.AccessTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("api/v1")
@@ -24,6 +27,8 @@ public class AccessController {
      */
     @PostMapping(path = "/login")
     public Object login(@RequestBody Login login){
-        return accessTokenService.createAndOrGetAccessToken(login);
+        Object atOrError = accessTokenService.createAndOrGetAccessToken(login);
+        return ResponseEntity.status(atOrError instanceof Error ? ((Error)atOrError).getStatus() : HttpStatus.OK.value())
+                .body(atOrError);
     }
 }

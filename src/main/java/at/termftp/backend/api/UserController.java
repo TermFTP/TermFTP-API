@@ -9,6 +9,7 @@ import at.termftp.backend.service.EmailSenderService;
 import at.termftp.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,11 +46,11 @@ public class UserController {
         try{
             id = UUID.fromString(userID);
         }catch (IllegalArgumentException ex){
-            return new Error(400, "Bad Request", ErrorMessages.getInvalidUserID());
+            return ResponseEntity.status(400).body(new Error(400, "Bad Request", ErrorMessages.getInvalidUserID()));
         }
 
         User user = userService.getUserById(id);
-        return user != null ? user : new Error(400, "Bad Request", ErrorMessages.getInvalidUserID());
+        return user != null ? user : ResponseEntity.status(400).body(new Error(400, "Bad Request", ErrorMessages.getInvalidUserID()));
     }
 
 
@@ -88,10 +89,10 @@ public class UserController {
 
         }catch(DataIntegrityViolationException ex){
             String message =  ex.getMostSpecificCause().getMessage();
-            return new Error(409, "Conflict",
+            return ResponseEntity.status(409).body(new Error(409, "Conflict",
                     message.contains("u_username")
                             ? ErrorMessages.getDuplicateUsername()
-                            : ErrorMessages.getDuplicateEmail());
+                            : ErrorMessages.getDuplicateEmail()));
         }
         return createdUser;
     }
@@ -112,6 +113,7 @@ public class UserController {
 
     /**
      * used to delete a single user by an ID
+     * TODO: check accesstoken
      * @param userID
      * @return number of deleted users (int) or an error (Error)
      */
@@ -122,7 +124,7 @@ public class UserController {
             id = UUID.fromString(userID);
             return userService.deleteUser(id);
         }catch (IllegalArgumentException ex){
-            return new Error(400, "Bad Request", ErrorMessages.getInvalidUserID());
+            return ResponseEntity.status(400).body(new Error(400, "Bad Request", ErrorMessages.getInvalidUserID()));
         }
     }
 }

@@ -1,5 +1,5 @@
 DROP TABLE public.confirmation_tokens;
-DROP TABLE public.access_tokens
+DROP TABLE public.access_tokens;
 DROP TABLE public.server_group_servers;
 DROP TABLE public.history_items;
 DROP TABLE public.server_groups;
