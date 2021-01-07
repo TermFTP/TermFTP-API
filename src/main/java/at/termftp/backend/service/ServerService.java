@@ -1,9 +1,11 @@
 package at.termftp.backend.service;
 
 import at.termftp.backend.dao.ServerGroupRepository;
+import at.termftp.backend.dao.ServerGroupServerRepository;
 import at.termftp.backend.dao.ServerRepository;
 import at.termftp.backend.model.Server;
 import at.termftp.backend.model.ServerGroup;
+import at.termftp.backend.model.ServerGroupServer;
 
 import java.util.List;
 import java.util.UUID;
@@ -11,10 +13,12 @@ import java.util.UUID;
 public class ServerService {
     private final ServerRepository serverRepository;
     private final ServerGroupRepository serverGroupRepository;
+    private final ServerGroupServerRepository serverGroupServerRepository;
 
-    public ServerService(ServerRepository serverRepository, ServerGroupRepository serverGroupRepository) {
+    public ServerService(ServerRepository serverRepository, ServerGroupRepository serverGroupRepository, ServerGroupServerRepository serverGroupServerRepository) {
         this.serverRepository = serverRepository;
         this.serverGroupRepository = serverGroupRepository;
+        this.serverGroupServerRepository = serverGroupServerRepository;
     }
 
     public Server getServerById(UUID serverID){
@@ -25,9 +29,12 @@ public class ServerService {
         return serverRepository.save(server);
     }
 
-    public int addServersToServerGroup(List<Server> servers, ServerGroup serverGroup){
-        // TODO: use ServerGroupServers
-        return -1;
+    public void addServersToServerGroup(List<Server> servers, ServerGroup serverGroup){
+        for(Server server : servers){
+            serverGroupServerRepository.save(new ServerGroupServer(server.getServerID(),
+                    serverGroup.getGroupID(),
+                    serverGroup.getUserID()));
+        }
     }
 
 
@@ -47,5 +54,6 @@ public class ServerService {
     public ServerGroup getAllServerGroupsForUserByName(UUID userID, String name){
         return serverGroupRepository.findServerGroupByUserIDAndName(userID, name).orElse(null);
     }
+
 
 }
