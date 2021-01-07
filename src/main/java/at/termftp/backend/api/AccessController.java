@@ -1,5 +1,6 @@
 package at.termftp.backend.api;
 
+import at.termftp.backend.model.DefaultResponse;
 import at.termftp.backend.model.Error;
 import at.termftp.backend.model.Login;
 import at.termftp.backend.service.AccessTokenService;
@@ -28,7 +29,6 @@ public class AccessController {
     @PostMapping(path = "/login")
     public Object login(@RequestBody Login login){
         Object atOrError = accessTokenService.createAndOrGetAccessToken(login);
-        return ResponseEntity.status(atOrError instanceof Error ? ((Error)atOrError).getStatus() : HttpStatus.OK.value())
-                .body(atOrError);
+        return DefaultResponse.createResponse(atOrError, "AccessToken");
     }
 }

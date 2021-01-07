@@ -46,11 +46,11 @@ public class UserController {
         try{
             id = UUID.fromString(userID);
         }catch (IllegalArgumentException ex){
-            return ResponseEntity.status(400).body(new Error(400, "Bad Request", ErrorMessages.getInvalidUserID()));
+            return ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
         }
 
         User user = userService.getUserById(id);
-        return user != null ? user : ResponseEntity.status(400).body(new Error(400, "Bad Request", ErrorMessages.getInvalidUserID()));
+        return user != null ? user : ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
     }
 
 
@@ -59,8 +59,9 @@ public class UserController {
      * @return List<User>
      */
     @GetMapping(path = "/getUsers")
-    public List<User> getAllUsers(){
-        return userService.getAllUsers();
+    public Object getAllUsers(){
+        List<User> users = userService.getAllUsers();
+        return DefaultResponse.createResponse(users, "List of all Users");
     }
 
     /**
@@ -89,12 +90,12 @@ public class UserController {
 
         }catch(DataIntegrityViolationException ex){
             String message =  ex.getMostSpecificCause().getMessage();
-            return ResponseEntity.status(409).body(new Error(409, "Conflict",
+            return ResponseEntity.status(409).body(new DefaultResponse(409, "Conflict",
                     message.contains("u_username")
                             ? ErrorMessages.getDuplicateUsername()
                             : ErrorMessages.getDuplicateEmail()));
         }
-        return createdUser;
+        return DefaultResponse.createResponse(createdUser, "Created User");
     }
 
     /**
@@ -103,11 +104,12 @@ public class UserController {
      * @return true if the user was verified successfully
      */
     @GetMapping(path = "/confirm-account")
-    public boolean verify(@RequestParam("token") String confirmationToken){
+    public Object verify(@RequestParam("token") String confirmationToken){
         if(confirmationToken == null || confirmationToken.length() <= 0){
             return false;
         }
-        return confirmationTokenService.validate(confirmationToken);
+        boolean result = confirmationTokenService.validate(confirmationToken);
+        return DefaultResponse.createResponse(result, "Verification");
     }
 
 
@@ -122,9 +124,10 @@ public class UserController {
         UUID id;
         try{
             id = UUID.fromString(userID);
-            return userService.deleteUser(id);
+            int deletedUsers = userService.deleteUser(id);
+            return DefaultResponse.createResponse(deletedUsers, "Deleted Users");
         }catch (IllegalArgumentException ex){
-            return ResponseEntity.status(400).body(new Error(400, "Bad Request", ErrorMessages.getInvalidUserID()));
+            return ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
         }
     }
 }
