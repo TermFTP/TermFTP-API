@@ -29,7 +29,7 @@ public class AccessTokenService {
      * @return true if the access token is still valid
      */
     private boolean isValid(AccessToken accessToken){
-        return accessToken.getGueltigBis().isAfter(LocalDate.now());
+        return accessToken.getValidUntil().isAfter(LocalDate.now());
     }
 
 
@@ -60,7 +60,7 @@ public class AccessTokenService {
         }
         if(accessToken != null){
             System.out.println("AccessToken has expired");
-            accessToken.setGueltigBis(LocalDate.now().plusDays(1));
+            accessToken.setValidUntil(LocalDate.now().plusDays(1));
             return accessTokenRepository.save(accessToken);
         }
 

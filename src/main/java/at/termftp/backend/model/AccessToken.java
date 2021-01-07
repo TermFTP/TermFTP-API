@@ -19,8 +19,8 @@ public class AccessToken {
     @Column(name = "user_id")
     private UUID userID;
 
-    @Column(name = "gueltig_bis")
-    private LocalDate gueltigBis;
+    @Column(name = "valid_until")
+    private LocalDate validUntil;
 
     @Column(name = "pc_name")
     private String pcName;
@@ -28,7 +28,7 @@ public class AccessToken {
     public AccessToken(UUID userID, LocalDate gueltigBis, String pcName) {
         this.token = TemporaryTokenGeneratorWhichShouldBeReplacedByJWTs.generate();
         this.userID = userID;
-        this.gueltigBis = gueltigBis;
+        this.validUntil = gueltigBis;
         this.pcName = pcName;
     }
 
@@ -42,7 +42,7 @@ public class AccessToken {
         return "AccessToken{" +
                 "token='" + token + '\'' +
                 ", userID=" + userID +
-                ", gueltigBis=" + gueltigBis +
+                ", gueltigBis=" + validUntil +
                 ", pcName='" + pcName + '\'' +
                 '}';
     }
@@ -56,7 +56,7 @@ public class AccessToken {
 
         if (token != null ? !token.equals(that.token) : that.token != null) return false;
         if (userID != null ? !userID.equals(that.userID) : that.userID != null) return false;
-        if (gueltigBis != null ? !gueltigBis.equals(that.gueltigBis) : that.gueltigBis != null) return false;
+        if (validUntil != null ? !validUntil.equals(that.validUntil) : that.validUntil != null) return false;
         return pcName != null ? pcName.equals(that.pcName) : that.pcName == null;
     }
 
@@ -64,7 +64,7 @@ public class AccessToken {
     public int hashCode() {
         int result = token != null ? token.hashCode() : 0;
         result = 31 * result + (userID != null ? userID.hashCode() : 0);
-        result = 31 * result + (gueltigBis != null ? gueltigBis.hashCode() : 0);
+        result = 31 * result + (validUntil != null ? validUntil.hashCode() : 0);
         result = 31 * result + (pcName != null ? pcName.hashCode() : 0);
         return result;
     }
@@ -85,12 +85,12 @@ public class AccessToken {
         this.userID = userID;
     }
 
-    public LocalDate getGueltigBis() {
-        return gueltigBis;
+    public LocalDate getValidUntil() {
+        return validUntil;
     }
 
-    public void setGueltigBis(LocalDate gueltigBis) {
-        this.gueltigBis = gueltigBis;
+    public void setValidUntil(LocalDate gueltigBis) {
+        this.validUntil = gueltigBis;
     }
 
     public String getPcName() {

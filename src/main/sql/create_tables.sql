@@ -170,7 +170,7 @@ CREATE TABLE public.access_tokens
 (
     token character varying(1024) COLLATE pg_catalog."default" NOT NULL,
     user_id uuid NOT NULL,
-    gueltig_bis date NOT NULL,
+    valid_until date NOT NULL,
     pc_name character varying(255) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT access_tokens_pkey PRIMARY KEY (token, user_id),
     CONSTRAINT user_fk FOREIGN KEY (user_id)
