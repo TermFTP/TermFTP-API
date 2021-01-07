@@ -19,6 +19,12 @@ public class DefaultResponse {
         return ResponseEntity.status(status).body(new DefaultResponse(status, message == null ? "OK" : message, data));
     }
 
+    /**
+     *
+     * @param status
+     * @param message
+     * @param data
+     */
     public DefaultResponse(@JsonProperty("status") int status,
                            @JsonProperty("message") String message,
                            @JsonProperty("data") Object data) {
