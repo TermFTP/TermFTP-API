@@ -10,6 +10,7 @@ import at.termftp.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.web.bind.annotation.*;
 
@@ -94,6 +95,10 @@ public class UserController {
                     message.contains("u_username")
                             ? ErrorMessages.getDuplicateUsername()
                             : ErrorMessages.getDuplicateEmail()));
+        }catch(MailSendException ex){
+            String message =  ex.getMostSpecificCause().getMessage();
+            return ResponseEntity.status(409)
+                    .body(new DefaultResponse(409, "Conflict", "Email could not be sent: " + message));
         }
         return DefaultResponse.createResponse(createdUser, "Created User");
     }
