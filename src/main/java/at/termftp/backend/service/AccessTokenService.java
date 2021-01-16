@@ -25,7 +25,7 @@ public class AccessTokenService {
 
     /**
      * This methods checks whether an access token has expired or not
-     * @param accessToken
+     * @param accessToken AccessToken
      * @return true if the access token is still valid
      */
     private boolean isValid(AccessToken accessToken){
@@ -35,7 +35,7 @@ public class AccessTokenService {
 
     /**
      * This method validates the user (login) and creates/updates the access token
-     * @param login
+     * @param login Login
      * @return AccessToken or Error
      */
     public Object createAndOrGetAccessToken(Login login){
@@ -52,7 +52,7 @@ public class AccessTokenService {
         }
 
         // check if user has already an access token
-        AccessToken accessToken = accessTokenRepository.findAccessTokenByUserID(user.getUserID()).orElse(null);
+        AccessToken accessToken = accessTokenRepository.findAccessTokenByUserID(user.getUserID()).orElse(null); // ch_1
 
         if(accessToken != null && isValid(accessToken)){
             System.out.println("AccessToken is still valid");
@@ -67,7 +67,7 @@ public class AccessTokenService {
         // create a new access token
         System.out.println("Creating AccessToken");
         LocalDate expirationDate = LocalDate.now().plusDays(1);
-        accessToken = new AccessToken(user.getUserID(), expirationDate, login.getPcName());
+        accessToken = new AccessToken(user, expirationDate, login.getPcName()); //ch_1
 
 
         return accessTokenRepository.save(accessToken);
@@ -82,5 +82,17 @@ public class AccessTokenService {
     }
 
 
+    /**
+     * used to find a user that is mapped by an AccessToken
+     * @param token AccessToken as String
+     * @return User
+     */
+    public User getUserByAccessToken(String token){
+        AccessToken accessToken = accessTokenRepository.findAccessTokenByToken(token).orElse(null);
+        if(accessToken != null && isValid(accessToken)){
+            return accessToken.getUser();
+        }
+        return null;
+    }
 
 }

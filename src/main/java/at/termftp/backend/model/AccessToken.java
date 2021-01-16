@@ -3,21 +3,22 @@ package at.termftp.backend.model;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.UUID;
 import at.termftp.backend.dao.TemporaryTokenGeneratorWhichShouldBeReplacedByJWTs;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-@IdClass(AccessTokenID.class)
 @Entity
 @Table(name = "access_tokens")
 public class AccessToken {
 
-    @Id
-    @Column(name = "token")
-    private String token;
 
-    @Id
-    @Column(name = "user_id")
-    private UUID userID;
+    @EmbeddedId
+    AccessTokenID accessTokenID;
+
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false)
+    private User user;
 
     @Column(name = "valid_until")
     private LocalDate validUntil;
@@ -25,27 +26,32 @@ public class AccessToken {
     @Column(name = "pc_name")
     private String pcName;
 
-    public AccessToken(UUID userID, LocalDate gueltigBis, String pcName) {
-        this.token = TemporaryTokenGeneratorWhichShouldBeReplacedByJWTs.generate();
-        this.userID = userID;
-        this.validUntil = gueltigBis;
+
+
+
+    public AccessToken(User user, LocalDate validUntil, String pcName) {
+        String token = TemporaryTokenGeneratorWhichShouldBeReplacedByJWTs.generate();
+        this.accessTokenID = new AccessTokenID(token, user.getUserID());
+        this.user = user;
+
+        this.validUntil = validUntil;
         this.pcName = pcName;
     }
-
-
-
     public AccessToken() {
     }
+
 
     @Override
     public String toString() {
         return "AccessToken{" +
-                "token='" + token + '\'' +
-                ", userID=" + userID +
-                ", gueltigBis=" + validUntil +
+                "accessTokenID=" + accessTokenID +
+                ", user=" + user +
+                ", validUntil=" + validUntil +
                 ", pcName='" + pcName + '\'' +
                 '}';
     }
+
+
 
     @Override
     public boolean equals(Object o) {
@@ -54,35 +60,40 @@ public class AccessToken {
 
         AccessToken that = (AccessToken) o;
 
-        if (token != null ? !token.equals(that.token) : that.token != null) return false;
-        if (userID != null ? !userID.equals(that.userID) : that.userID != null) return false;
+        if (accessTokenID != null ? !accessTokenID.equals(that.accessTokenID) : that.accessTokenID != null)
+            return false;
+        if (user != null ? !user.equals(that.user) : that.user != null) return false;
         if (validUntil != null ? !validUntil.equals(that.validUntil) : that.validUntil != null) return false;
         return pcName != null ? pcName.equals(that.pcName) : that.pcName == null;
     }
 
     @Override
     public int hashCode() {
-        int result = token != null ? token.hashCode() : 0;
-        result = 31 * result + (userID != null ? userID.hashCode() : 0);
+        int result = accessTokenID != null ? accessTokenID.hashCode() : 0;
+        result = 31 * result + (user != null ? user.hashCode() : 0);
         result = 31 * result + (validUntil != null ? validUntil.hashCode() : 0);
         result = 31 * result + (pcName != null ? pcName.hashCode() : 0);
         return result;
     }
 
-    public String getToken() {
-        return token;
+
+
+
+    public AccessTokenID getAccessTokenID() {
+        return accessTokenID;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setAccessTokenID(AccessTokenID accessTokenID) {
+        this.accessTokenID = accessTokenID;
     }
 
-    public UUID getUserID() {
-        return userID;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserID(UUID userID) {
-        this.userID = userID;
+    public void setUser(User user) {
+        this.user = user;
+        this.accessTokenID.setUserID(user.getUserID());
     }
 
     public LocalDate getValidUntil() {

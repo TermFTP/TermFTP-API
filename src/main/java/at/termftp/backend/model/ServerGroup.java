@@ -1,82 +1,82 @@
 package at.termftp.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "server_groups")
 public class ServerGroup {
-//    group_id uuid NOT NULL,
-//    name character varying(256) COLLATE pg_catalog."default",
-//    user_id uuid NOT NULL,
 
-    @Id
-    @Column(name = "group_id")
-    private UUID groupID;
+    @EmbeddedId
+    private ServerGroupID serverGroupID;
 
     @Column(name = "name")
     private String name;
 
-    @Column(name = "user_id")
-    private UUID userID;
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false)
+    private User user;
 
-    public ServerGroup(@JsonProperty("groupID") UUID groupID,
-                       @JsonProperty("name") String name,
-                       @JsonProperty("userID") UUID userID) {
-        this.groupID = groupID;
-        this.name = name;
-        this.userID = userID;
+    @OneToMany(mappedBy = "serverGroup")
+    private List<ServerGroupServer> serverGroupServers;
+
+
+    public UUID getUserID(){
+        return serverGroupID.getUserID();
+    }
+    public UUID getGroupID(){
+        return serverGroupID.getGroupID();
     }
 
+    public List<Server> getServer(){
+        return serverGroupServers.stream().map(ServerGroupServer::getServer).collect(Collectors.toList());
+    }
+
+
+
+
+    public ServerGroup(@JsonProperty("groupID") ServerGroupID serverGroupID,
+                       @JsonProperty("name") String name,
+                       @JsonProperty("userID") User user) {
+        this.serverGroupID = serverGroupID;
+        this.name = name;
+        this.user = user;
+    }
+    public ServerGroup(String name, User user) {
+        this.name = name;
+        this.user = user;
+        this.serverGroupID = new ServerGroupID(user.getUserID(), UUID.randomUUID());
+        this.serverGroupServers = new ArrayList<>();
+    }
     public ServerGroup() {
     }
 
-    public ServerGroup(String name, UUID userID) {
-        this.name = name;
-        this.userID = userID;
-        this.groupID = UUID.randomUUID();
-    }
+
 
     @Override
     public String toString() {
         return "ServerGroup{" +
-                "groupID=" + groupID +
+                "serverGroupID=" + serverGroupID +
                 ", name='" + name + '\'' +
-                ", userID=" + userID +
                 '}';
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
 
-        ServerGroup that = (ServerGroup) o;
 
-        if (groupID != null ? !groupID.equals(that.groupID) : that.groupID != null) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        return userID != null ? userID.equals(that.userID) : that.userID == null;
+
+    @JsonIgnore
+    public ServerGroupID getServerGroupID() {
+        return serverGroupID;
     }
 
-    @Override
-    public int hashCode() {
-        int result = groupID != null ? groupID.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (userID != null ? userID.hashCode() : 0);
-        return result;
-    }
-
-    public UUID getGroupID() {
-        return groupID;
-    }
-
-    public void setGroupID(UUID groupID) {
-        this.groupID = groupID;
+    public void setServerGroupID(ServerGroupID serverGroupID) {
+        this.serverGroupID = serverGroupID;
     }
 
     public String getName() {
@@ -87,11 +87,21 @@ public class ServerGroup {
         this.name = name;
     }
 
-    public UUID getUserID() {
-        return userID;
+    @JsonIgnore
+    public List<ServerGroupServer> getServerGroupServers() {
+        return serverGroupServers;
     }
 
-    public void setUserID(UUID userID) {
-        this.userID = userID;
+    public void setServerGroupServers(List<ServerGroupServer> servers) {
+        this.serverGroupServers = servers;
+    }
+
+    @JsonIgnore
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

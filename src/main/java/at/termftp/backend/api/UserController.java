@@ -2,7 +2,6 @@ package at.termftp.backend.api;
 
 import at.termftp.backend.dao.ErrorMessages;
 import at.termftp.backend.model.*;
-import at.termftp.backend.model.Error;
 import at.termftp.backend.service.AccessTokenService;
 import at.termftp.backend.service.ConfirmationTokenService;
 import at.termftp.backend.service.EmailSenderService;
@@ -38,8 +37,8 @@ public class UserController {
 
     /**
      * This method returns a user if the ID is correct, otherwise an error
-     * @param userID
-     * @return User or Error
+     * @param userID the ID of the user
+     * @return User
      */
     @GetMapping(path = "/getUser/{id}")
     public Object getUserByID(@PathVariable("id") String userID){
@@ -51,13 +50,14 @@ public class UserController {
         }
 
         User user = userService.getUserById(id);
-        return user != null ? user : ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
+
+        return user != null ? DefaultResponse.createResponse(user, "user") : ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
     }
 
 
     /**
      * This method returns a list of all users
-     * @return List<User>
+     * @return {@code List<User>}
      */
     @GetMapping(path = "/getUsers")
     public Object getAllUsers(){
@@ -65,17 +65,18 @@ public class UserController {
         return DefaultResponse.createResponse(users, "List of all Users");
     }
 
+
     /**
      * This method creates and returns a new user, if email|username is duplicate -> error
-     * @param user
-     * @return User or Error
+     * @param user User
+     * @return User
      */
     @PostMapping(path = "/register")
     public Object createUser(@RequestBody User user){
         User createdUser = null;
         try{
             createdUser = userService.createUser(user);
-            ConfirmationToken confirmationToken = confirmationTokenService.createAndGetConfirmationToken(user.getUserID());
+            ConfirmationToken confirmationToken = confirmationTokenService.createAndGetConfirmationToken(user);
 
             SimpleMailMessage mailMessage = new SimpleMailMessage();
             mailMessage.setTo(user.getEmail());
@@ -83,7 +84,7 @@ public class UserController {
             mailMessage.setFrom("termftp.gmail.com");
             String text = "To confirm your account, please click the following link: "
                     + "http://localhost:8080/api/v1/confirm-account?token="
-                    + confirmationToken.getToken();
+                    + confirmationToken.getConfirmationTokenID().getToken();
             mailMessage.setText(text);
 
             emailSenderService.sendEmail(mailMessage);
@@ -96,16 +97,17 @@ public class UserController {
                             ? ErrorMessages.getDuplicateUsername()
                             : ErrorMessages.getDuplicateEmail()));
         }catch(MailSendException ex){
-            String message =  ex.getMostSpecificCause().getMessage();
+            String message = "User created but email could not be sent: " + ex.getMostSpecificCause().getMessage();
+            Object[] data = {createdUser, message};
             return ResponseEntity.status(409)
-                    .body(new DefaultResponse(409, "Conflict", "Email could not be sent: " + message));
+                    .body(new DefaultResponse(409, "Conflict", data));
         }
         return DefaultResponse.createResponse(createdUser, "Created User");
     }
 
     /**
      * Tis method verifies a user when he click the link in the email
-     * @param confirmationToken
+     * @param confirmationToken the ConfirmationToken
      * @return true if the user was verified successfully
      */
     @GetMapping(path = "/confirm-account")
@@ -121,7 +123,7 @@ public class UserController {
     /**
      * used to delete a single user by an ID
      * TODO: check accesstoken
-     * @param userID
+     * @param userID id of the User
      * @return number of deleted users (int) or an error (Error)
      */
     @DeleteMapping(path = "/deleteUser/{id}")
@@ -129,7 +131,8 @@ public class UserController {
         UUID id;
         try{
             id = UUID.fromString(userID);
-            int deletedUsers = userService.deleteUser(id);
+            User user = userService.getUserById(id);
+            int deletedUsers = userService.deleteUser(user);
             return DefaultResponse.createResponse(deletedUsers, "Deleted Users");
         }catch (IllegalArgumentException ex){
             return ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));

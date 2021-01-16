@@ -1,12 +1,11 @@
 package at.termftp.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -28,11 +27,19 @@ public class Server {
     @Column(name = "last_connection")
     private LocalDate lastConnection;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "server")
+    private List<ServerGroupServer> serverGroupServers;
+
+
     public Server(@JsonProperty("serverID") UUID serverID,
                   @JsonProperty("ip") String ip,
                   @JsonProperty("ftpPort") int ftpPort,
                   @JsonProperty("sshPort") int sshPort,
                   @JsonProperty("lastConnection") LocalDate lastConnection) {
+        if(serverID == null){
+            serverID = UUID.randomUUID();
+        }
         this.serverID = serverID;
         this.ip = ip;
         this.ftpPort = ftpPort;
@@ -50,6 +57,8 @@ public class Server {
 
     public Server() {
     }
+
+
 
     @Override
     public String toString() {
@@ -84,6 +93,18 @@ public class Server {
         result = 31 * result + sshPort;
         result = 31 * result + (lastConnection != null ? lastConnection.hashCode() : 0);
         return result;
+    }
+
+
+
+
+    @JsonIgnore
+    public List<ServerGroupServer> getServerGroupServers() {
+        return serverGroupServers;
+    }
+
+    public void setServerGroupServers(List<ServerGroupServer> serverGroups) {
+        this.serverGroupServers = serverGroups;
     }
 
     public UUID getServerID() {

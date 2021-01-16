@@ -1,11 +1,22 @@
 package at.termftp.backend.model;
 
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.IdClass;
 import java.io.Serializable;
 import java.util.UUID;
 
+@Embeddable
 public class AccessTokenID implements Serializable {
+
+    @Column(name = "token")
     private String token;
+
+    @Column(name = "user_id")
     private UUID userID;
+
+
+
 
     public AccessTokenID() {
     }
@@ -14,6 +25,8 @@ public class AccessTokenID implements Serializable {
         this.token = token;
         this.userID = userID;
     }
+
+
 
     @Override
     public boolean equals(Object o) {
@@ -31,5 +44,24 @@ public class AccessTokenID implements Serializable {
         int result = token != null ? token.hashCode() : 0;
         result = 31 * result + (userID != null ? userID.hashCode() : 0);
         return result;
+    }
+
+
+
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public UUID getUserID() {
+        return userID;
+    }
+
+    public void setUserID(UUID userID) {
+        this.userID = userID;
     }
 }

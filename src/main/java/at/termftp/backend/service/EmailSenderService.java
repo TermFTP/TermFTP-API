@@ -17,7 +17,7 @@ public class EmailSenderService {
 
     /**
      * this method actually sends the email
-     * @param email
+     * @param email SimpleMailMessage
      */
     @Async
     public void sendEmail(SimpleMailMessage email){

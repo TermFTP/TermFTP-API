@@ -9,6 +9,7 @@ public class DefaultResponse {
     private String message;
     private Object data;
 
+
     public static ResponseEntity<DefaultResponse> createResponse(Object data, String message){
 
         if(data instanceof Error){
@@ -19,12 +20,8 @@ public class DefaultResponse {
         return ResponseEntity.status(status).body(new DefaultResponse(status, message == null ? "OK" : message, data));
     }
 
-    /**
-     *
-     * @param status
-     * @param message
-     * @param data
-     */
+
+
     public DefaultResponse(@JsonProperty("status") int status,
                            @JsonProperty("message") String message,
                            @JsonProperty("data") Object data) {
@@ -36,6 +33,9 @@ public class DefaultResponse {
     public DefaultResponse() {
     }
 
+
+
+
     @Override
     public String toString() {
         return "DefaultResponse{" +
@@ -44,6 +44,9 @@ public class DefaultResponse {
                 ", data=" + data +
                 '}';
     }
+
+
+
 
     @Override
     public boolean equals(Object o) {
@@ -64,6 +67,9 @@ public class DefaultResponse {
         result = 31 * result + (data != null ? data.hashCode() : 0);
         return result;
     }
+
+
+
 
     public int getStatus() {
         return status;

@@ -3,10 +3,8 @@ package at.termftp.backend.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -29,13 +27,18 @@ public class User {
     @Column(name = "verified")
     private boolean verified;
 
+    @JsonIgnore // preventing infinite recursion
+    @OneToMany(mappedBy = "user", targetEntity = ServerGroup.class)
+    private List<ServerGroup> serverGroups;
 
-    public User(UUID userID, String username, String email, String password, boolean verified) {
+
+    public User(UUID userID, String username, String email, String password, boolean verified, List<ServerGroup> serverGroups) {
         this.userID = userID;
         this.username = username;
         this.email = email;
         this.password = password;
         this.verified = verified;
+        this.serverGroups = serverGroups;
     }
 
     public User(@JsonProperty("username") String username,
@@ -51,6 +54,7 @@ public class User {
     public User() {
     }
 
+
     @Override
     public String toString() {
         return "User{" +
@@ -59,6 +63,7 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", verified=" + verified +
+                ", serverGroups=" + serverGroups +
                 '}';
     }
 
@@ -70,21 +75,27 @@ public class User {
         User user = (User) o;
 
         if (verified != user.verified) return false;
-        if (!userID.equals(user.userID)) return false;
-        if (!username.equals(user.username)) return false;
-        if (!email.equals(user.email)) return false;
-        return password.equals(user.password);
+        if (userID != null ? !userID.equals(user.userID) : user.userID != null) return false;
+        if (username != null ? !username.equals(user.username) : user.username != null) return false;
+        if (email != null ? !email.equals(user.email) : user.email != null) return false;
+        if (password != null ? !password.equals(user.password) : user.password != null) return false;
+        return serverGroups != null ? serverGroups.equals(user.serverGroups) : user.serverGroups == null;
     }
 
     @Override
     public int hashCode() {
-        int result = userID.hashCode();
-        result = 31 * result + username.hashCode();
-        result = 31 * result + email.hashCode();
-        result = 31 * result + password.hashCode();
+        int result = userID != null ? userID.hashCode() : 0;
+        result = 31 * result + (username != null ? username.hashCode() : 0);
+        result = 31 * result + (email != null ? email.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (verified ? 1 : 0);
+        result = 31 * result + (serverGroups != null ? serverGroups.hashCode() : 0);
         return result;
     }
+
+
+
+
 
     public UUID getUserID() {
         return userID;
@@ -125,5 +136,13 @@ public class User {
 
     public void setVerified(boolean verified) {
         this.verified = verified;
+    }
+
+    public List<ServerGroup> getServerGroups() {
+        return serverGroups;
+    }
+
+    public void setServerGroups(List<ServerGroup> serverGroups) {
+        this.serverGroups = serverGroups;
     }
 }

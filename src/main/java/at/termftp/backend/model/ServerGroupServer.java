@@ -1,38 +1,58 @@
 package at.termftp.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.UUID;
 
-@IdClass(ServerGroupServer.class)
+
 @Entity
 @Table(name = "server_group_servers")
 public class ServerGroupServer implements Serializable {
-    @Id
-    @Column(name = "server_id")
-    private UUID serverID;
 
-    @Column(name = "group_id")
-    private UUID groupID;
+    @EmbeddedId
+    private ServerGroupServerID serverGroupServerID;
 
-    @Column(name = "user_id")
-    private UUID userID;
+    @ManyToOne
+    @MapsId("serverID")
+    @JoinColumn(name = "server_id", insertable = false, updatable = false)
+    private Server server;
 
-    public ServerGroupServer(UUID serverID, UUID groupID, UUID userID) {
-        this.serverID = serverID;
-        this.groupID = groupID;
-        this.userID = userID;
+    @ManyToOne
+    @MapsId("serverGroupID")
+    @JoinColumns({
+            @JoinColumn(name = "group_id"),
+            @JoinColumn(name = "user_id")
+    })
+    private ServerGroup serverGroup;
+
+
+
+
+    public ServerGroupServer(ServerGroupServerID serverGroupServerID, Server server, ServerGroup serverGroup) {
+        this.serverGroupServerID = serverGroupServerID;
+        this.server = server;
+        this.serverGroup = serverGroup;
+    }
+
+    public ServerGroupServer(Server server, ServerGroup serverGroup) {
+        this.server = server;
+        this.serverGroup = serverGroup;
+        this.serverGroupServerID = new ServerGroupServerID(server.getServerID(), serverGroup.getServerGroupID());
     }
 
     public ServerGroupServer() {
     }
 
+
+
     @Override
     public String toString() {
         return "ServerGroupServer{" +
-                "serverID=" + serverID +
-                ", groupID=" + groupID +
-                ", userID=" + userID +
+                "serverGroupServerID=" + serverGroupServerID +
+                ", server=" + server +
+                ", serverGroup=" + serverGroup +
                 '}';
     }
 
@@ -43,40 +63,46 @@ public class ServerGroupServer implements Serializable {
 
         ServerGroupServer that = (ServerGroupServer) o;
 
-        if (serverID != null ? !serverID.equals(that.serverID) : that.serverID != null) return false;
-        if (groupID != null ? !groupID.equals(that.groupID) : that.groupID != null) return false;
-        return userID != null ? userID.equals(that.userID) : that.userID == null;
+        if (serverGroupServerID != null ? !serverGroupServerID.equals(that.serverGroupServerID) : that.serverGroupServerID != null)
+            return false;
+        if (server != null ? !server.equals(that.server) : that.server != null) return false;
+        return serverGroup != null ? serverGroup.equals(that.serverGroup) : that.serverGroup == null;
     }
 
     @Override
     public int hashCode() {
-        int result = serverID != null ? serverID.hashCode() : 0;
-        result = 31 * result + (groupID != null ? groupID.hashCode() : 0);
-        result = 31 * result + (userID != null ? userID.hashCode() : 0);
+        int result = serverGroupServerID != null ? serverGroupServerID.hashCode() : 0;
+        result = 31 * result + (server != null ? server.hashCode() : 0);
+        result = 31 * result + (serverGroup != null ? serverGroup.hashCode() : 0);
         return result;
     }
 
-    public UUID getServerID() {
-        return serverID;
+
+
+
+    @JsonIgnore
+    public ServerGroupServerID getServerGroupServerID() {
+        return serverGroupServerID;
     }
 
-    public void setServerID(UUID serverID) {
-        this.serverID = serverID;
+    public void setServerGroupServerID(ServerGroupServerID serverGroupServerID) {
+        this.serverGroupServerID = serverGroupServerID;
     }
 
-    public UUID getGroupID() {
-        return groupID;
+    public Server getServer() {
+        return server;
     }
 
-    public void setGroupID(UUID groupID) {
-        this.groupID = groupID;
+    public void setServer(Server server) {
+        this.server = server;
     }
 
-    public UUID getUserID() {
-        return userID;
+    @JsonIgnore
+    public ServerGroup getServerGroup() {
+        return serverGroup;
     }
 
-    public void setUserID(UUID userID) {
-        this.userID = userID;
+    public void setServerGroup(ServerGroup serverGroup) {
+        this.serverGroup = serverGroup;
     }
 }

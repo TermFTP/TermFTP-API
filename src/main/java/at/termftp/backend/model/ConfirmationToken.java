@@ -6,39 +6,44 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.UUID;
 
-@IdClass(ConfirmationTokenID.class)
 @Entity
 @Table(name = "confirmation_tokens")
 public class ConfirmationToken {
 
-    @Id
-    @Column(name = "token")
-    private String token;
+    @EmbeddedId
+    ConfirmationTokenID confirmationTokenID;
 
-    @Id
-    @Column(name = "user_id")
-    private UUID userID;
 
-    @Column(name = "gueltig_bis")
-    private LocalDate gueltigBis;
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false) //ch_1
+    private User user;
 
-    public ConfirmationToken(UUID userID) {
-        this.userID = userID;
-        this.token = TemporaryTokenGeneratorWhichShouldBeReplacedByJWTs.generate();
-        this.gueltigBis = LocalDate.now().plusDays(1);
+    @Column(name = "valid_until")
+    private LocalDate validUntil;
+
+
+
+
+    public ConfirmationToken(User user) {
+        this.user = user;
+        String token = TemporaryTokenGeneratorWhichShouldBeReplacedByJWTs.generate();
+        this.confirmationTokenID = new ConfirmationTokenID(token, user.getUserID());
+
+        this.validUntil = LocalDate.now().plusDays(1);
     }
 
     public ConfirmationToken() {
     }
 
+
     @Override
     public String toString() {
         return "ConfirmationToken{" +
-                "token='" + token + '\'' +
-                ", userID=" + userID +
-                ", gueltigBis=" + gueltigBis +
+                "confirmationTokenID=" + confirmationTokenID +
+                ", validUntil=" + validUntil +
                 '}';
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -47,40 +52,44 @@ public class ConfirmationToken {
 
         ConfirmationToken that = (ConfirmationToken) o;
 
-        if (token != null ? !token.equals(that.token) : that.token != null) return false;
-        if (userID != null ? !userID.equals(that.userID) : that.userID != null) return false;
-        return gueltigBis != null ? gueltigBis.equals(that.gueltigBis) : that.gueltigBis == null;
+        if (confirmationTokenID != null ? !confirmationTokenID.equals(that.confirmationTokenID) : that.confirmationTokenID != null)
+            return false;
+        if (user != null ? !user.equals(that.user) : that.user != null) return false;
+        return validUntil != null ? validUntil.equals(that.validUntil) : that.validUntil == null;
     }
 
     @Override
     public int hashCode() {
-        int result = token != null ? token.hashCode() : 0;
-        result = 31 * result + (userID != null ? userID.hashCode() : 0);
-        result = 31 * result + (gueltigBis != null ? gueltigBis.hashCode() : 0);
+        int result = confirmationTokenID != null ? confirmationTokenID.hashCode() : 0;
+        result = 31 * result + (user != null ? user.hashCode() : 0);
+        result = 31 * result + (validUntil != null ? validUntil.hashCode() : 0);
         return result;
     }
 
-    public String getToken() {
-        return token;
+
+
+    public ConfirmationTokenID getConfirmationTokenID() {
+        return confirmationTokenID;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setConfirmationTokenID(ConfirmationTokenID confirmationTokenID) {
+        this.confirmationTokenID = confirmationTokenID;
     }
 
-    public UUID getUserID() {
-        return userID;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserID(UUID userID) {
-        this.userID = userID;
+    public void setUser(User user) {
+        this.user = user;
+        this.confirmationTokenID.setUserID(user.getUserID());
     }
 
-    public LocalDate getGueltigBis() {
-        return gueltigBis;
+    public LocalDate getValidUntil() {
+        return validUntil;
     }
 
-    public void setGueltigBis(LocalDate gueltigBis) {
-        this.gueltigBis = gueltigBis;
+    public void setValidUntil(LocalDate gueltigBis) {
+        this.validUntil = gueltigBis;
     }
 }

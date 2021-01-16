@@ -1,8 +1,7 @@
 package at.termftp.backend.service;
 
-import at.termftp.backend.dao.AccessTokenRepository;
-import at.termftp.backend.dao.ConfirmationTokenRepository;
-import at.termftp.backend.dao.UserRepository;
+import at.termftp.backend.dao.*;
+import at.termftp.backend.model.ServerGroup;
 import at.termftp.backend.model.User;
 import org.springframework.stereotype.Service;
 
@@ -15,16 +14,18 @@ public class UserService {
     private final UserRepository userRepository;
     private final ConfirmationTokenRepository confirmationTokenRepository;
     private final AccessTokenRepository accessTokenRepository;
+    private final ServerGroupRepository serverGroupRepository;
 
-    public UserService(UserRepository userRepository, ConfirmationTokenRepository confirmationTokenRepository, AccessTokenRepository accessTokenRepository) {
+    public UserService(UserRepository userRepository, ConfirmationTokenRepository confirmationTokenRepository, AccessTokenRepository accessTokenRepository, ServerGroupRepository serverGroupRepository) {
         this.userRepository = userRepository;
         this.confirmationTokenRepository = confirmationTokenRepository;
         this.accessTokenRepository = accessTokenRepository;
+        this.serverGroupRepository = serverGroupRepository;
     }
 
     /**
      * used to get a single user by and ID
-     * @param userID
+     * @param userID the User's ID
      * @return the user or null
      */
     public User getUserById(UUID userID){
@@ -40,16 +41,16 @@ public class UserService {
 
     /**
      * used to create a user
-     * @param user
      * @return the user
      */
     public User createUser(User user){
-        return userRepository.save(user);
+        user = userRepository.save(user);
+        serverGroupRepository.save(new ServerGroup("default", user)); // ch_1
+        return user;
     }
 
     /**
      * used to get a user by username
-     * @param username
      * @return the user or null
      */
     public User getUserByName(String username){
@@ -59,18 +60,17 @@ public class UserService {
     /**
      * deletes an user by userID
      * ------------ may throw exception when other tables still refer to this user -> delete from other tables first ------------------s
-     * @param userID
      * @return the number of deleted users
      */
-    public int deleteUser(UUID userID){
-        int cToken = confirmationTokenRepository.deleteByUserID(userID);
-        System.out.println("-- Deleted " + cToken + " confirmationToken for user: " + userID);
-        int aToken = accessTokenRepository.deleteByUserID(userID);
-        System.out.println("-- Deleted " + aToken + " access token(s) for user: " + userID);
+    public int deleteUser(User user){
+        int cToken = confirmationTokenRepository.deleteByUser(user.getUserID());
+        System.out.println("-- Deleted " + cToken + " confirmationToken for user: " + user);
+        int aToken = accessTokenRepository.deleteByUserID(user.getUserID());
+        System.out.println("-- Deleted " + aToken + " access token(s) for user: " + user);
 
         // delete from other tables TODO
 
-        return userRepository.deleteByUserID(userID);
+        return userRepository.deleteByUserID(user.getUserID());
     }
 
 }

@@ -7,7 +7,6 @@ import at.termftp.backend.model.User;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Service
 public class ConfirmationTokenService {
@@ -21,16 +20,16 @@ public class ConfirmationTokenService {
 
     /**
      * used to create a confirmation token
-     * @param userID
+     * @param user User
      * @return the confirmation token
      */
-    public ConfirmationToken createAndGetConfirmationToken(UUID userID){
-        return confirmationTokenRepository.save(new ConfirmationToken(userID));
+    public ConfirmationToken createAndGetConfirmationToken(User user){
+        return confirmationTokenRepository.save(new ConfirmationToken(user));
     }
 
     /**
      * this method validates the confirmation token of a user (after registration)
-     * @param token
+     * @param token AT as String
      * @return true if the token is valid
      */
     public boolean validate(String token){
@@ -38,14 +37,14 @@ public class ConfirmationTokenService {
         if(confirmationToken == null){
             return false;
         }
-        if(!confirmationToken.getToken().equals(token)){
+        if(!confirmationToken.getConfirmationTokenID().getToken().equals(token)){
             return false;
         }
-        if(!confirmationToken.getGueltigBis().isAfter(LocalDate.now())){
+        if(!confirmationToken.getValidUntil().isAfter(LocalDate.now())){
             return false;
         }
 
-        User user = userRepository.findUserByUserID(confirmationToken.getUserID()).orElse(null);
+        User user = userRepository.findUserByUserID(confirmationToken.getUser().getUserID()).orElse(null);
         if(user != null){
             user.setVerified(true);
             userRepository.save(user);
