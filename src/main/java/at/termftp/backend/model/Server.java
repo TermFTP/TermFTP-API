@@ -27,6 +27,12 @@ public class Server {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "username")
+    private String username;
+
+    @Column(name = "password")
+    private String password;
+
     @Column(name = "last_connection")
     private LocalDate lastConnection;
 
@@ -40,7 +46,9 @@ public class Server {
                   @JsonProperty("ftpPort") int ftpPort,
                   @JsonProperty("sshPort") int sshPort,
                   @JsonProperty("lastConnection") LocalDate lastConnection,
-                  @JsonProperty("name") String name) {
+                  @JsonProperty("name") String name,
+                  @JsonProperty("username") String username,
+                  @JsonProperty("password") String password) {
         if(serverID == null){
             serverID = UUID.randomUUID();
         }
@@ -50,6 +58,8 @@ public class Server {
         this.sshPort = sshPort;
         this.lastConnection = lastConnection;
         this.name = name;
+        this.username = username;
+        this.password = password;
     }
 
     public Server(String ip) {
@@ -64,7 +74,6 @@ public class Server {
     }
 
 
-
     @Override
     public String toString() {
         return "Server{" +
@@ -73,6 +82,8 @@ public class Server {
                 ", ftpPort=" + ftpPort +
                 ", sshPort=" + sshPort +
                 ", name='" + name + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
                 ", lastConnection=" + lastConnection +
                 '}';
     }
@@ -89,6 +100,8 @@ public class Server {
         if (serverID != null ? !serverID.equals(server.serverID) : server.serverID != null) return false;
         if (ip != null ? !ip.equals(server.ip) : server.ip != null) return false;
         if (name != null ? !name.equals(server.name) : server.name != null) return false;
+        if (username != null ? !username.equals(server.username) : server.username != null) return false;
+        if (password != null ? !password.equals(server.password) : server.password != null) return false;
         if (lastConnection != null ? !lastConnection.equals(server.lastConnection) : server.lastConnection != null)
             return false;
         return serverGroupServers != null ? serverGroupServers.equals(server.serverGroupServers) : server.serverGroupServers == null;
@@ -101,6 +114,8 @@ public class Server {
         result = 31 * result + ftpPort;
         result = 31 * result + sshPort;
         result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (username != null ? username.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (lastConnection != null ? lastConnection.hashCode() : 0);
         result = 31 * result + (serverGroupServers != null ? serverGroupServers.hashCode() : 0);
         return result;
@@ -161,5 +176,21 @@ public class Server {
 
     public void setLastConnection(LocalDate lastConnection) {
         this.lastConnection = lastConnection;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
