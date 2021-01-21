@@ -24,6 +24,9 @@ public class Server {
     @Column(name = "ssh_port")
     private int sshPort;
 
+    @Column(name = "name")
+    private String name;
+
     @Column(name = "last_connection")
     private LocalDate lastConnection;
 
@@ -36,7 +39,8 @@ public class Server {
                   @JsonProperty("ip") String ip,
                   @JsonProperty("ftpPort") int ftpPort,
                   @JsonProperty("sshPort") int sshPort,
-                  @JsonProperty("lastConnection") LocalDate lastConnection) {
+                  @JsonProperty("lastConnection") LocalDate lastConnection,
+                  @JsonProperty("name") String name) {
         if(serverID == null){
             serverID = UUID.randomUUID();
         }
@@ -45,6 +49,7 @@ public class Server {
         this.ftpPort = ftpPort;
         this.sshPort = sshPort;
         this.lastConnection = lastConnection;
+        this.name = name;
     }
 
     public Server(String ip) {
@@ -67,6 +72,7 @@ public class Server {
                 ", ip='" + ip + '\'' +
                 ", ftpPort=" + ftpPort +
                 ", sshPort=" + sshPort +
+                ", name='" + name + '\'' +
                 ", lastConnection=" + lastConnection +
                 '}';
     }
@@ -82,7 +88,10 @@ public class Server {
         if (sshPort != server.sshPort) return false;
         if (serverID != null ? !serverID.equals(server.serverID) : server.serverID != null) return false;
         if (ip != null ? !ip.equals(server.ip) : server.ip != null) return false;
-        return lastConnection != null ? lastConnection.equals(server.lastConnection) : server.lastConnection == null;
+        if (name != null ? !name.equals(server.name) : server.name != null) return false;
+        if (lastConnection != null ? !lastConnection.equals(server.lastConnection) : server.lastConnection != null)
+            return false;
+        return serverGroupServers != null ? serverGroupServers.equals(server.serverGroupServers) : server.serverGroupServers == null;
     }
 
     @Override
@@ -91,12 +100,11 @@ public class Server {
         result = 31 * result + (ip != null ? ip.hashCode() : 0);
         result = 31 * result + ftpPort;
         result = 31 * result + sshPort;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (lastConnection != null ? lastConnection.hashCode() : 0);
+        result = 31 * result + (serverGroupServers != null ? serverGroupServers.hashCode() : 0);
         return result;
     }
-
-
-
 
     @JsonIgnore
     public List<ServerGroupServer> getServerGroupServers() {
@@ -137,6 +145,14 @@ public class Server {
 
     public void setSshPort(int sshPort) {
         this.sshPort = sshPort;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public LocalDate getLastConnection() {
