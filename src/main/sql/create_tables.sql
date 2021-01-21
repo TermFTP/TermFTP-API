@@ -144,7 +144,7 @@ ALTER TABLE public.server_group_servers
 CREATE TABLE public.history_items
 (
     user_id uuid NOT NULL,
-    "when" time without time zone NOT NULL,
+    "when" timestamp without time zone NOT NULL,
     device character varying(256) COLLATE pg_catalog."default" NOT NULL,
     ip character varying(64) COLLATE pg_catalog."default" NOT NULL,
     deleted boolean NOT NULL,
