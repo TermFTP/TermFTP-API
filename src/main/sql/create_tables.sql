@@ -72,10 +72,13 @@ CREATE TABLE public.servers
     ftp_port integer,
     ssh_port integer,
     last_connection timestamp without time zone,
+    name character varying(255) COLLATE pg_catalog."default",
+    username character varying(255) COLLATE pg_catalog."default",
+    password character varying(255) COLLATE pg_catalog."default",
     CONSTRAINT servers_pkey PRIMARY KEY (server_id)
 )
 
-TABLESPACE pg_default;
+    TABLESPACE pg_default;
 
 ALTER TABLE public.servers
     OWNER to postgres;
@@ -119,16 +122,14 @@ CREATE TABLE public.server_group_servers
     CONSTRAINT f_server_group FOREIGN KEY (group_id, user_id)
         REFERENCES public.server_groups (group_id, user_id) MATCH SIMPLE
         ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-        NOT VALID,
+        ON DELETE NO ACTION,
     CONSTRAINT f_server_id FOREIGN KEY (server_id)
         REFERENCES public.servers (server_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
-        NOT VALID
 )
 
-TABLESPACE pg_default;
+    TABLESPACE pg_default;
 
 ALTER TABLE public.server_group_servers
     OWNER to postgres;
@@ -149,6 +150,7 @@ CREATE TABLE public.history_items
     deleted boolean NOT NULL,
     ssh_port integer,
     ftp_port integer,
+    username character varying(255) COLLATE pg_catalog."default",
     CONSTRAINT history_items_pkey PRIMARY KEY (user_id, "when"),
     CONSTRAINT f_user_id FOREIGN KEY (user_id)
         REFERENCES public.users (user_id) MATCH SIMPLE
@@ -156,7 +158,7 @@ CREATE TABLE public.history_items
         ON DELETE NO ACTION
 )
 
-TABLESPACE pg_default;
+    TABLESPACE pg_default;
 
 ALTER TABLE public.history_items
     OWNER to postgres;
