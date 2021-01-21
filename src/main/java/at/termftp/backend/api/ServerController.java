@@ -2,12 +2,14 @@ package at.termftp.backend.api;
 
 import at.termftp.backend.model.*;
 import at.termftp.backend.service.AccessTokenService;
+import at.termftp.backend.service.HistoryItemService;
 import at.termftp.backend.service.ServerService;
 import at.termftp.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -20,12 +22,14 @@ public class ServerController {
     private final ServerService serverService;
     private final AccessTokenService accessTokenService;
     private final UserService userService;
+    private final HistoryItemService historyItemService;
 
     @Autowired
-    public ServerController(ServerService serverService, AccessTokenService accessTokenService, UserService userService) {
+    public ServerController(ServerService serverService, AccessTokenService accessTokenService, UserService userService, HistoryItemService historyItemService) {
         this.serverService = serverService;
         this.accessTokenService = accessTokenService;
         this.userService = userService;
+        this.historyItemService = historyItemService;
     }
 
 
@@ -133,4 +137,41 @@ public class ServerController {
         List<ServerGroup> serverGroups = serverService.getAllServerGroupsForUser(user.getUserID());
         return DefaultResponse.createResponse(serverGroups, "Server-Groups");
     }
+
+
+    /**
+     * handler for saving Connections aka HistoryItems
+     * @param token The AccessToken of the User
+     * @param historyItem The HistoryItem: NOT NULL fields: device, ip
+     *
+     * @return the updated HistoryItem
+     */
+    @PostMapping(path = "/connection")
+    public Object saveConnection(@RequestHeader("Access-Token") String token,
+                                 @RequestBody HistoryItem historyItem){
+
+        LocalDateTime timestamp = LocalDateTime.now();
+        User user = accessTokenService.getUserByAccessToken(token);
+        if(user == null){
+            return ResponseEntity.status(401)
+                    .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
+        }
+
+        // check for NOT NULL fields
+        if(historyItem.getDevice() == null){
+            return ResponseEntity.status(401)
+                    .body(new DefaultResponse(400, "Bad Request", "HistoryItem.device must not be null!"));
+        }
+        if(historyItem.getIp() == null){
+            return ResponseEntity.status(401)
+                    .body(new DefaultResponse(400, "Bad Request", "HistoryItem.ip must not be null!"));
+        }
+
+        // set ID and save
+        historyItem.setID(user.getUserID(), timestamp);
+        historyItem = historyItemService.saveHistoryItem(historyItem);
+
+        return DefaultResponse.createResponse(historyItem, "Saved HistoryItem (=Connection)");
+    }
+
 }
