@@ -3,7 +3,9 @@ package at.termftp.backend.api;
 import at.termftp.backend.model.DefaultResponse;
 import at.termftp.backend.model.Login;
 import at.termftp.backend.service.AccessTokenService;
+import com.sun.istack.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("api/v1")
@@ -24,7 +26,12 @@ public class AccessController {
      * @return AccessToken or Error
      */
     @PostMapping(path = "/login")
-    public Object login(@RequestBody Login login){
+    public Object login(@RequestBody Login login,
+                        @RequestHeader("PC-Name") String pcName){
+        if(pcName == null || pcName.length() == 0){
+            return ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", "PC-Name must be set (header)!"));
+        }
+        login.setPcName(pcName);
         Object atOrError = accessTokenService.createAndOrGetAccessToken(login);
         return DefaultResponse.createResponse(atOrError, "AccessToken");
     }

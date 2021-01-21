@@ -51,23 +51,23 @@ public class AccessTokenService {
             return new Error(401, "Unauthorized", ErrorMessages.getInvalidPassword());
         }
 
+
+
         // check if user has already an access token
-        AccessToken accessToken = accessTokenRepository.findAccessTokenByUserID(user.getUserID()).orElse(null); // ch_1
+        AccessToken accessToken = accessTokenRepository.findAccessTokenByUserID(user.getUserID()).orElse(null);
 
         if(accessToken != null && isValid(accessToken)){
             System.out.println("AccessToken is still valid");
             return accessToken;
         }
-        if(accessToken != null){
+        if(accessToken != null) {
             System.out.println("AccessToken has expired");
-            accessToken.setValidUntil(LocalDate.now().plusDays(1));
-            return accessTokenRepository.save(accessToken);
         }
 
         // create a new access token
         System.out.println("Creating AccessToken");
         LocalDate expirationDate = LocalDate.now().plusDays(1);
-        accessToken = new AccessToken(user, expirationDate, login.getPcName()); //ch_1
+        accessToken = new AccessToken(user, expirationDate, login.getPcName());
 
 
         return accessTokenRepository.save(accessToken);

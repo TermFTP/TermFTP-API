@@ -11,11 +11,9 @@ public class Login {
     }
 
     public Login(@JsonProperty("username") String username,
-                 @JsonProperty("password") String password,
-                 @JsonProperty("pcName") String pcName) {
+                 @JsonProperty("password") String password) {
         this.username = username;
         this.password = password;
-        this.pcName = pcName;
     }
 
     @Override

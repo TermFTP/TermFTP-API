@@ -19,7 +19,11 @@ public interface AccessTokenRepository extends JpaRepository<AccessToken, Access
      * @param userID the ID of the User
      * @return AccessToken
      */
-    @Query(value = "SELECT * FROM access_tokens ac WHERE ac.user_id = ?1",
+    @Query(value = "SELECT token, user_id, valid_until, pc_name " +
+            "FROM access_tokens " +
+            "WHERE user_id = ?1 " +
+            "ORDER BY valid_until DESC " +
+            "LIMIT 1;",
             nativeQuery = true)
     Optional<AccessToken> findAccessTokenByUserID(UUID userID);
 
