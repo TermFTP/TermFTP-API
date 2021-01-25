@@ -45,7 +45,8 @@ public class UserService {
      */
     public User createUser(User user){
         user = userRepository.save(user);
-        serverGroupRepository.save(new ServerGroup("default", user)); // ch_1
+        serverGroupRepository.save(new ServerGroup("default", user));
+        serverGroupRepository.save(new ServerGroup("favourites", user));
         return user;
     }
 
