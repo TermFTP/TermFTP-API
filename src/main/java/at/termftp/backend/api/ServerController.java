@@ -174,4 +174,22 @@ public class ServerController {
         return DefaultResponse.createResponse(historyItem, "Saved HistoryItem (=Connection)");
     }
 
+
+    /**
+     * used to get a history of all connections (of a user)
+     * @return List of HistoryItems
+     */
+    @GetMapping(path = "/connections")
+    public Object getConnections(@RequestHeader("Access-Token") String token){
+        User user = accessTokenService.getUserByAccessToken(token);
+        if(user == null){
+            return ResponseEntity.status(401)
+                    .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
+        }
+
+        List<HistoryItem> historyItems = historyItemService.getHistoryItemsByUser(user);
+
+        return DefaultResponse.createResponse(historyItems, "List of Connections (HistoryItems) aka 'vErLaUf'");
+    }
+
 }

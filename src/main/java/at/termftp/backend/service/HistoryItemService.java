@@ -2,6 +2,7 @@ package at.termftp.backend.service;
 
 import at.termftp.backend.dao.HistoryItemRepository;
 import at.termftp.backend.model.HistoryItem;
+import at.termftp.backend.model.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class HistoryItemService {
         return historyItemRepository.save(historyItem);
     }
 
-    public List<HistoryItem> getHistoryItemsByUser(UUID userID){
-        return historyItemRepository.findHistoryItemsByUser(userID).orElse(null);
+    public List<HistoryItem> getHistoryItemsByUser(User user){
+        return historyItemRepository.findHistoryItemsByUser(user).orElse(null);
     }
 }
