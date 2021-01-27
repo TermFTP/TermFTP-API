@@ -95,14 +95,21 @@ CREATE TABLE public.server_groups
     group_id uuid NOT NULL,
     name character varying(256) COLLATE pg_catalog."default",
     user_id uuid NOT NULL,
+    parent_group_id uuid,
+    parent_user_id uuid,
     CONSTRAINT server_groups_pkey PRIMARY KEY (group_id, user_id),
+    CONSTRAINT fk_parent FOREIGN KEY (parent_group_id, parent_user_id)
+        REFERENCES public.server_groups (group_id, user_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
     CONSTRAINT user_id FOREIGN KEY (user_id)
         REFERENCES public.users (user_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
 
-TABLESPACE pg_default;
+    TABLESPACE pg_default;
 
 ALTER TABLE public.server_groups
     OWNER to postgres;

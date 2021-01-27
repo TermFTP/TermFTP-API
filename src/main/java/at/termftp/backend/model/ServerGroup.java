@@ -1,12 +1,12 @@
 package at.termftp.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -23,8 +23,23 @@ public class ServerGroup {
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false)
     private User user;
 
-    @OneToMany(mappedBy = "serverGroup")
+    @OneToMany(mappedBy = "serverGroup", fetch = FetchType.EAGER)
     private List<ServerGroupServer> serverGroupServers;
+
+
+
+    @OneToMany(mappedBy = "parentGroup", fetch = FetchType.EAGER)
+    private Set<ServerGroup> serverGroups = new HashSet<>();
+
+    @ManyToOne
+//    @JoinColumns({
+//            @JoinColumn(name = "group_id", insertable = false, updatable = false),
+//            @JoinColumn(name = "user_id", insertable = false, updatable = false)
+//    })
+    private ServerGroup parentGroup;
+
+
+
 
 
     public UUID getUserID(){
@@ -53,10 +68,10 @@ public class ServerGroup {
         this.user = user;
         this.serverGroupID = new ServerGroupID(user.getUserID(), UUID.randomUUID());
         this.serverGroupServers = new ArrayList<>();
+        this.serverGroups = new HashSet<>();
     }
     public ServerGroup() {
     }
-
 
 
     @Override
@@ -64,11 +79,9 @@ public class ServerGroup {
         return "ServerGroup{" +
                 "serverGroupID=" + serverGroupID +
                 ", name='" + name + '\'' +
+                ", serverGroups=" + serverGroups.stream().map(sg -> sg.getServerGroupID()).collect(Collectors.toList()) +
                 '}';
     }
-
-
-
 
     @JsonIgnore
     public ServerGroupID getServerGroupID() {
@@ -103,5 +116,23 @@ public class ServerGroup {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    @JsonManagedReference
+    public Set<ServerGroup> getServerGroups() {
+        return serverGroups;
+    }
+
+    public void setServerGroups(Set<ServerGroup> serverGroups) {
+        this.serverGroups = serverGroups;
+    }
+
+    @JsonBackReference
+    public ServerGroup getParentGroup() {
+        return parentGroup;
+    }
+
+    public void setParentGroup(ServerGroup parentGroup) {
+        this.parentGroup = parentGroup;
     }
 }

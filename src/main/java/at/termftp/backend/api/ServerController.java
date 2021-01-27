@@ -40,11 +40,25 @@ public class ServerController {
      * @return ServerGroup
      * @throws IllegalArgumentException Invalid Server-IDs
      */
-    private Object groupServers(Group group, ServerGroup serverGroup) throws IllegalArgumentException{
+    private Object groupServers(Group group, ServerGroup serverGroup, UUID userID) throws IllegalArgumentException{
         // add existing servers to group
-        List<UUID> serverIDs = group.getServers().stream().map(UUID::fromString).collect(Collectors.toList());
-        List<Server> servers = serverIDs.stream().map(serverService::getServerById).collect(Collectors.toList());
-        serverGroup = serverService.addServersToServerGroup(servers, serverGroup);
+        if(group.getServers() != null && group.getServers().size() > 0){
+            List<UUID> serverIDs = group.getServers().stream().map(UUID::fromString).collect(Collectors.toList());
+            List<Server> servers = serverIDs.stream().map(serverService::getServerById).collect(Collectors.toList());
+            serverGroup = serverService.addServersToServerGroup(servers, serverGroup);
+        }
+
+        // add ServerGroups (children) to a Parent-ServerGroup
+        if(group.getGroups() != null){
+            List<UUID> groupIDs = group.getGroups().stream().map(UUID::fromString).collect(Collectors.toList());
+            List<ServerGroup> serverGroups = groupIDs.stream().map(groupID -> serverService.getServerGroupByID(groupID, userID)).collect(Collectors.toList());
+
+            serverGroup.getServerGroups().addAll(serverGroups);
+            serverService.updateChildGroups(serverGroup);
+        }
+
+
+
 
         return DefaultResponse.createResponse(serverGroup, "Server-Group");
     }
@@ -70,9 +84,9 @@ public class ServerController {
         try{
             if(group.getGroupID() == null){
                 // new empty group
-                ServerGroup serverGroup = new ServerGroup(group.getName(), user); //ch_1
+                ServerGroup serverGroup = new ServerGroup(group.getName(), user);
                 serverGroup = serverService.saveServerGroup(serverGroup);
-                return groupServers(group, serverGroup);
+                return groupServers(group, serverGroup, user.getUserID());
 
             }else{
                 UUID groupID = UUID.fromString(group.getGroupID());
@@ -81,15 +95,16 @@ public class ServerController {
                 // change the name of the group, if required
                 if(group.getName() != null){
                     serverGroup.setName(group.getName());
-                    System.out.println(serverGroup);
+
                     serverGroup = serverService.saveServerGroup(serverGroup);
                     System.out.println(serverGroup);
                 }
-                return groupServers(group, serverGroup);
+                return groupServers(group, serverGroup, user.getUserID());
             }
         }catch(IllegalArgumentException e){
+            String message = e.getMessage().contains("Child-Group") ? "; " + e.getMessage() : "";
             return ResponseEntity.status(400)
-                    .body(new DefaultResponse(400, "Bad Request", "Invalid Server-IDs (must be of type UUID!)"));
+                    .body(new DefaultResponse(400, "Bad Request", "Invalid Server-IDs (must be of type UUID!)" + message));
         }
     }
 
@@ -191,5 +206,23 @@ public class ServerController {
 
         return DefaultResponse.createResponse(historyItems, "List of Connections (HistoryItems) aka 'vErLaUf'");
     }
+
+
+
+
+
+    @GetMapping(path = "/servers")
+    public Object getServerDetails(@RequestHeader("Access-Token") String token){
+        User user = accessTokenService.getUserByAccessToken(token);
+        if(user == null){
+            return ResponseEntity.status(401)
+                    .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
+        }
+
+
+
+        return ResponseEntity.status(501).body(new DefaultResponse(501, "Not implemented", "TODO"));
+    }
+
 
 }

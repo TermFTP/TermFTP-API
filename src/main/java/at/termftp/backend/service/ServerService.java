@@ -39,7 +39,12 @@ public class ServerService {
      * @return Server
      */
     public Server createServer(Server server){
+        System.out.println("creating server " + server.getName());
         return serverRepository.save(server);
+    }
+
+    public ServerGroup getServerGroupByID(UUID groupID, UUID userID){
+        return serverGroupRepository.findServerGroupByID(groupID, userID).orElse(null);
     }
 
 
@@ -55,7 +60,7 @@ public class ServerService {
             sgs = serverGroupServerRepository.save(sgs);
             serverGroup.getServerGroupServers().add(sgs);
         }
-
+        System.out.println("> added " + servers.size() + " server(s) to ServerGroup " + serverGroup.getName());
         return serverGroup;
     }
 
@@ -63,15 +68,14 @@ public class ServerService {
      * used to add a single Server to an existing ServerGroup
      * @param server Server
      * @param serverGroup ServerGroup
-     * @return ServerGroup
      */
-    public ServerGroup addServerToServerGroup(Server server, ServerGroup serverGroup){
+    public void addServerToServerGroup(Server server, ServerGroup serverGroup){
 
         ServerGroupServer sgs = new ServerGroupServer(server, serverGroup);
         sgs = serverGroupServerRepository.save(sgs);
         serverGroup.getServerGroupServers().add(sgs);
 
-        return serverGroup;
+        System.out.println("> added Server " + server.getName() + "to ServerGroup " + serverGroup.getName());
     }
 
 
@@ -81,7 +85,22 @@ public class ServerService {
      * @return the new ServerGroup
      */
     public ServerGroup saveServerGroup(ServerGroup serverGroup){
+        System.out.println("> saving ServerGroup: " + serverGroup.getName());
         return serverGroupRepository.save(serverGroup);
+    }
+
+
+    public void updateChildGroups(ServerGroup serverGroup) throws IllegalArgumentException{
+        for(ServerGroup childGroup : serverGroup.getServerGroups()){
+            if(childGroup == null){
+                throw new IllegalArgumentException("Child-Group does not exist!");
+            }
+            if(childGroup.getGroupID().equals(serverGroup.getGroupID())){
+                throw new IllegalArgumentException("Child-Group cannot be its own parent");
+            }
+            serverGroupRepository.addParentServerGroup(childGroup.getGroupID(), childGroup.getUserID(), serverGroup.getGroupID());
+        }
+        System.out.println("> updated ServerGroup " + serverGroup.getName() + " (updated Child-Groups)");
     }
 
     /**

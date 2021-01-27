@@ -3,13 +3,16 @@ package at.termftp.backend.dao;
 import at.termftp.backend.model.ServerGroup;
 import at.termftp.backend.model.ServerGroupID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Transactional
 @Repository
 public interface ServerGroupRepository extends JpaRepository<ServerGroup, ServerGroupID> {
 
@@ -28,7 +31,7 @@ public interface ServerGroupRepository extends JpaRepository<ServerGroup, Server
      * @param userID :UUID the user's ID
      * @return a List of ServerGroups
      */
-    @Query(value = "SELECT * FROM server_groups WHERE user_id = ?1",
+    @Query(value = "SELECT * FROM server_groups WHERE user_id = ?1 AND parent_group_group_id IS NULL",
             nativeQuery = true)
     Optional<List<ServerGroup>> findServerGroupsByUserID(UUID userID);
 
@@ -42,5 +45,19 @@ public interface ServerGroupRepository extends JpaRepository<ServerGroup, Server
     @Query(value = "SELECT * FROM server_groups WHERE user_id = ?1 AND name = ?2",
             nativeQuery = true)
     Optional<ServerGroup> findServerGroupByUserIDAndName(UUID userID, String name);
+
+
+
+    @Query(value = "SELECT * FROM server_groups WHERE group_id = ?1 AND user_id = ?2",
+            nativeQuery = true)
+    Optional<ServerGroup> findServerGroupByID(UUID groupID, UUID userID);
+
+
+
+    @Modifying(clearAutomatically = true)
+    @Query(value = "UPDATE server_groups SET parent_group_group_id = ?3, parent_group_user_id = ?2 WHERE group_id = ?1 AND user_id = ?2",
+            nativeQuery = true)
+    void addParentServerGroup(UUID childGroupID, UUID userID, UUID parentGroupID);
+
 
 }

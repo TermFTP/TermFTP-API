@@ -6,12 +6,14 @@ public class Group {
     private String groupID;
     private String name;
     private List<String> servers;
+    private List<String> groups;
 
 
-    public Group(String groupID, String name, List<String> servers) {
+    public Group(String groupID, String name, List<String> servers, List<String> groups) {
         this.groupID = groupID;
         this.name = name;
         this.servers = servers;
+        this.groups = groups;
     }
 
     public Group() {
@@ -23,9 +25,9 @@ public class Group {
                 "groupID='" + groupID + '\'' +
                 ", name='" + name + '\'' +
                 ", servers=" + servers +
+                ", groups=" + groups +
                 '}';
     }
-
 
     public String getGroupID() {
         return groupID;
@@ -51,6 +53,14 @@ public class Group {
         this.servers = servers;
     }
 
+    public List<String> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<String> groups) {
+        this.groups = groups;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -60,7 +70,8 @@ public class Group {
 
         if (groupID != null ? !groupID.equals(group.groupID) : group.groupID != null) return false;
         if (name != null ? !name.equals(group.name) : group.name != null) return false;
-        return servers != null ? servers.equals(group.servers) : group.servers == null;
+        if (servers != null ? !servers.equals(group.servers) : group.servers != null) return false;
+        return groups != null ? groups.equals(group.groups) : group.groups == null;
     }
 
     @Override
@@ -68,6 +79,7 @@ public class Group {
         int result = groupID != null ? groupID.hashCode() : 0;
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (servers != null ? servers.hashCode() : 0);
+        result = 31 * result + (groups != null ? groups.hashCode() : 0);
         return result;
     }
 }

@@ -43,9 +43,13 @@ public class ServerGroupID implements Serializable {
         return result;
     }
 
-
-
-
+    @Override
+    public String toString() {
+        return "ServerGroupID{" +
+                "userID=" + userID +
+                ", groupID=" + groupID +
+                '}';
+    }
 
     public UUID getUserID() {
         return userID;
