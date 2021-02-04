@@ -135,6 +135,7 @@ public class Server {
     }
 
     public void setServerID(UUID serverID) {
+        System.out.println("here");
         this.serverID = serverID;
     }
 

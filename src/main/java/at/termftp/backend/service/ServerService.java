@@ -43,6 +43,16 @@ public class ServerService {
         return serverRepository.save(server);
     }
 
+
+
+    public void updateServer(Server server){
+        server = serverRepository.save(server);
+        System.out.println("> Updated Server");
+    }
+
+
+
+
     public ServerGroup getServerGroupByID(UUID groupID, UUID userID){
         return serverGroupRepository.findServerGroupByID(groupID, userID).orElse(null);
     }

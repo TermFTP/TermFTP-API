@@ -136,6 +136,29 @@ public class ServerController {
         return DefaultResponse.createResponse(server, "Created Server");
     }
 
+
+    @PutMapping(path = "/updateServer")
+    public Object updateServer(@RequestBody Server server,
+                               @RequestHeader("Access-Token") String token){
+        // validate AT
+        User user = accessTokenService.getUserByAccessToken(token);
+        if(user == null){
+            return ResponseEntity.status(401)
+                    .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
+        }
+
+        if(serverService.getServerById(server.getServerID()) == null){
+            return ResponseEntity.status(400)
+                    .body(new DefaultResponse(400, "Bad Request", "Invalid serverID! This server does not exist yet. " +
+                            "If you want to create a new Server please use `api/v1/createServer`"));
+        }
+
+        serverService.updateServer(server);
+
+
+        return DefaultResponse.createResponse(server, "Updated Server");
+    }
+
     /**
      * used to get all ServerGroups of a user
      * @param token users' AccessToken as String
