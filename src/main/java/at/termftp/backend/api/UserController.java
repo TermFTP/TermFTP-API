@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @RequestMapping("api/v1")
 @RestController
-@CrossOrigin(origins= "http://localhost:3000", methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD})
+@CrossOrigin(origins= "http://localhost:3000", methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD, RequestMethod.PUT})
 public class UserController {
 
     private final UserService userService;

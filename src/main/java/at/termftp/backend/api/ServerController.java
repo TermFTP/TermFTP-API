@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @RequestMapping("api/v1")
 @RestController
-@CrossOrigin(origins= "http://localhost:3000", methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD})
+@CrossOrigin(origins= "http://localhost:3000", methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD, RequestMethod.PUT})
 public class ServerController {
 
     private final ServerService serverService;
