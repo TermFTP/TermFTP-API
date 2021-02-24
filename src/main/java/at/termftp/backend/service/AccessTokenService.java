@@ -8,6 +8,7 @@ import at.termftp.backend.model.Login;
 import at.termftp.backend.model.User;
 import org.springframework.stereotype.Service;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class AccessTokenService {
      * @param login Login
      * @return AccessToken or Error
      */
-    public Object createAndOrGetAccessToken(Login login){
+    public Object createAndOrGetAccessToken(Login login) {
 
         // get the user by username
         User user = userService.getUserByName(login.getUsername());
@@ -47,7 +48,7 @@ public class AccessTokenService {
         }
 
         // check password
-        if(!user.getPassword().equals(login.getPassword())){
+        if(!user.getPassword().equals(UserService.hashPassword(login.getPassword()))){
             return new Error(401, "Unauthorized", ErrorMessages.getInvalidPassword());
         }
 
