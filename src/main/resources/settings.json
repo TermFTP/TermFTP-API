@@ -1,0 +1,24 @@
+{
+    "$schema": "settings_schema.json",
+    "asdf" : "10",
+    "defaultProfile" : "Work",
+    "profiles" : [
+        {
+            "profileId" : "Work",
+            "colorSchema" : "Monokai",
+            "fontSizeBase" : "12pt",
+            "fontFamily" : "Roboto",
+            "autoLogin" : false,
+            "keybindings" : [
+                {
+                    "action" : "zoomIn",
+                    "keys" : "Strg++"
+                },
+                {
+                    "action" : "zoomOut",
+                    "key" : "Strg+-"
+                }
+            ]
+        }
+    ]
+}

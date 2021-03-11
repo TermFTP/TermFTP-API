@@ -1,0 +1,34 @@
+{
+    "$schema" : "http://json-schema.org/draft-07/schema",
+    "type" : "object",
+    "required" : ["defaultProfile", "profiles"],
+    "properties" : {
+        "defaultProfile" : {
+            "type" : "string",
+            "description" : "The default Profile which should be loaded."
+        },
+        "profiles" : {
+            "type" : "array",
+            "uniqueItems" : true,
+            "items" : {
+                "type" : "object",
+                "required" : ["profileId", "colorSchema",
+                    "fontSizeBase", "fontFamily", "autoLogin", "keybindings"],
+                "properties" : {
+                    "profileId" : {
+                        "type" : "string"
+                    },
+                    "colorSchema" : {
+                        "type" : "string"
+                    },
+                    "fontSizeBase" : {
+                        "type" : "string",
+                        "pattern" : "^[0-9]{1,3}([,.][0-9]{1,3})?(cm|mm|in|px|pt|pc|em|ex|ch|rem|vh|vmin|vmax|%)$",
+                        "examples" : ["10pt", "1,123%", "999.222cm"]
+                    }
+                }
+            },
+            "description" : "The list of available profiles to choose from."
+        }
+    }
+}
