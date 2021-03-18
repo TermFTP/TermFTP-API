@@ -15,6 +15,8 @@ import java.nio.file.Paths;
 @RestController
 @CrossOrigin(origins= "http://localhost:3000", methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD})
 public class SettingsController {
+    private static final Path schema = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "settings_schema.json");
+    private static final Path jsonFile = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "settings.json");
 
     @Autowired
     public SettingsController() {
@@ -23,17 +25,27 @@ public class SettingsController {
     @GetMapping(path = "/settings")
     public Object parseSettings(){
 
-        Path schema = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "settings_schema.json");
-        Path jsonFile = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "settings.json");
+
 
         boolean result = false;
         try {
             result = SettingsParser.validate(jsonFile, schema);
         } catch (IOException | ValidationException e) {
-            return ResponseEntity.status(200).body(DefaultResponse.createResponse(e.getMessage(), "The settings-file is INVALID!!!"));
+            return ResponseEntity.status(409).body(new DefaultResponse(409, "The settings-file is INVALID!!!", e.getMessage()));
         }
 
         return ResponseEntity.status(200).body(DefaultResponse.createResponse(result, result ? "The settings-file seems to be valid." : "The file does not exist!"));
+    }
+
+    @GetMapping(path = "/settings/get")
+    public Object getSetting(){
+        Object property = null;
+        try {
+            property = SettingsParser.getProperty(jsonFile, "profiles.0", true, schema);
+        } catch (IOException | ValidationException e) {
+            return ResponseEntity.status(409).body(new DefaultResponse(409, "The settings-file is INVALID!!!", e.getMessage()));
+        }
+        return ResponseEntity.status(200).body(DefaultResponse.createResponse(property, "Experimental - TODO - Not completely tested yet!"));
     }
 
 
