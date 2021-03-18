@@ -12,6 +12,7 @@
             "uniqueItems" : true,
             "items" : {
                 "type" : "object",
+                "description" : "One profile.",
                 "required" : ["profileId", "colorSchema",
                     "fontSizeBase", "fontFamily", "autoLogin", "keybindings"],
                 "properties" : {
@@ -25,6 +26,29 @@
                         "type" : "string",
                         "pattern" : "^[0-9]{1,3}([,.][0-9]{1,3})?(cm|mm|in|px|pt|pc|em|ex|ch|rem|vh|vmin|vmax|%)$",
                         "examples" : ["10pt", "1,123%", "999.222cm"]
+                    },
+                    "fontFamily" : {
+                        "type" : "string"
+                    },
+                    "autoLogin" : {
+                        "type" : "boolean"
+                    },
+                    "keybindings" : {
+                        "description" : "aka shortcuts",
+                        "type" : "array",
+                        "uniqueItems" : true,
+                        "items" : {
+                            "type" : "object",
+                            "required" : ["action", "keys"],
+                            "properties" : {
+                                "action" : {
+                                    "type" : "string"
+                                },
+                                "keys" : {
+                                    "type" : "string"
+                                }
+                            }
+                        }
                     }
                 }
             },

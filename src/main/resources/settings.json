@@ -16,7 +16,7 @@
                 },
                 {
                     "action" : "zoomOut",
-                    "key" : "Strg+-"
+                    "keys" : "Strg+-"
                 }
             ]
         }
