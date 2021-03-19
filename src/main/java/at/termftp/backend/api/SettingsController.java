@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 
 @RequestMapping("api/v1")
 @RestController
-@CrossOrigin(origins= "http://localhost:3000", methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD})
+@CrossOrigin(origins= "http://localhost:3000", methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD, RequestMethod.PUT})
 public class SettingsController {
     private static final Path schema = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "settings_schema.json");
     private static final Path jsonFile = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "settings.json");
@@ -22,31 +22,42 @@ public class SettingsController {
     public SettingsController() {
     }
 
+    /**
+     * endpoint to retrieve the local settings file
+     * @return a defaultResponse with the jsonString
+     */
     @GetMapping(path = "/settings")
-    public Object parseSettings(){
-
-
-
-        boolean result = false;
+    public Object getSettings(){
         try {
-            result = SettingsParser.validate(jsonFile, schema);
-        } catch (IOException | ValidationException e) {
-            return ResponseEntity.status(409).body(new DefaultResponse(409, "The settings-file is INVALID!!!", e.getMessage()));
-        }
+            String settings = SettingsParser.getCompleteJsonFile(jsonFile, schema);
+            return ResponseEntity.status(200).body(DefaultResponse.createResponse(settings, ".. and here are the settings."));
 
-        return ResponseEntity.status(200).body(DefaultResponse.createResponse(result, result ? "The settings-file seems to be valid." : "The file does not exist!"));
+        } catch (IOException | ValidationException e) {
+            return ResponseEntity.status(409).body(new DefaultResponse(409, "The local settings-file is INVALID!!!", e.getMessage()));
+        }
     }
 
-    @GetMapping(path = "/settings/get")
-    public Object getSetting(){
-        Object property = null;
+    /**
+     * endpoint to save settings into a local settings-file (json)
+     * @param jsonString the jsonString of settings
+     * @return a defaultResponse with the status
+     */
+    @PostMapping(path = "/settings")
+    public Object saveSettings(@RequestBody String jsonString){
+
         try {
-            property = SettingsParser.getProperty(jsonFile, "profiles.0", true, schema);
+            boolean success = SettingsParser.saveSettings(jsonFile, schema, jsonString);
+            if(success){
+                return ResponseEntity.status(200).body(DefaultResponse.createResponse(success, "Successfully saved settings."));
+            }else{
+                return ResponseEntity.status(400).body(new DefaultResponse(400, "The jsonString is INVALID!!!", false));
+            }
+
         } catch (IOException | ValidationException e) {
-            return ResponseEntity.status(409).body(new DefaultResponse(409, "The settings-file is INVALID!!!", e.getMessage()));
+            return ResponseEntity.status(400).body(new DefaultResponse(400, "The jsonString is INVALID!!!", false));
         }
-        return ResponseEntity.status(200).body(DefaultResponse.createResponse(property, "Experimental - TODO - Not completely tested yet!"));
     }
+
 
 
 }

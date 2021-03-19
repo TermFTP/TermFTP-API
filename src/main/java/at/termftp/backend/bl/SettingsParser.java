@@ -10,12 +10,34 @@ import org.json.JSONTokener;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Optional;
 
 public class SettingsParser {
-    public static boolean validate(Path jsonPath, Path schemaPath) throws IOException, ValidationException {
+
+    /**
+     * is responsible for actual validation
+     * @param json the jsonString to validate
+     * @param schemaString the jsonString of the schema used for validating
+     * @return whether validation was successful or not
+     * @throws ValidationException thrown if the json file is not valid ACCORDING TO THE SCHEMA
+     */
+    private static boolean validate(String json, String schemaString) throws ValidationException{
+        JSONObject jsonSchema = new JSONObject(new JSONTokener(schemaString));
+        JSONObject jsonSubject = new JSONObject(new JSONTokener(json));
+
+        Schema schema = SchemaLoader.load(jsonSchema);
+        schema.validate(jsonSubject);
+        return true;
+    }
+
+    /**
+     * used to validate a whole json FILE
+     * @param jsonPath the path to the json file
+     * @param schemaPath the path to the schema file
+     * @return whether validation was successful or not
+     * @throws IOException thrown if the json file cannot be parsed
+     * @throws ValidationException thrown if the json file is not valid ACCORDING TO THE SCHEMA
+     */
+    public static boolean validationWrapper(Path jsonPath, Path schemaPath) throws IOException, ValidationException {
         if(!jsonPath.toFile().isFile()){
             return false;
         }
@@ -28,18 +50,20 @@ public class SettingsParser {
         String jsonStringFile = mapper.readTree(jsonPath.toFile()).toPrettyString();
         String jsonStringSchema = mapper.readTree(schemaPath.toFile()).toPrettyString();
 
-
-        JSONObject jsonSchema = new JSONObject(new JSONTokener(jsonStringSchema));
-        JSONObject jsonSubject = new JSONObject(new JSONTokener(jsonStringFile));
-
-        Schema schema = SchemaLoader.load(jsonSchema);
-        schema.validate(jsonSubject);
-        return true;
+        return validate(jsonStringFile, jsonStringSchema);
     }
 
+    /**
+     * used to get a complete json file
+     * @param path the path to the json file
+     * @param schemaPath the path to the schema file (if validation should be done)
+     * @return the jsonString of the json file
+     * @throws IOException thrown if the json file cannot be parsed
+     * @throws ValidationException thrown if the json file is not valid ACCORDING TO THE SCHEMA
+     */
     public static String getCompleteJsonFile(Path path, Path schemaPath) throws IOException, ValidationException {
         if(schemaPath != null){
-            if(!validate(path, schemaPath)){
+            if(!validationWrapper(path, schemaPath)){
                 return null;
             }
         }
@@ -48,53 +72,27 @@ public class SettingsParser {
         return mapper.readTree(path.toFile()).toPrettyString();
     }
 
-    public static String getAllProfiles(Path path) throws IOException {
-        JsonMapper mapper = new JsonMapper();
-        JsonNode node = mapper.readTree(path.toFile());
-        JsonNode profiles = node.get("profiles");
-        return profiles.toPrettyString();
-    }
-
     /**
-     * this method can get any property over a given property path
-     * @param path ... path to the json file
-     * @param propertyPath ... list of properties separated by '.' eg: "profiles.0.profileId"
-     * @param isObject ... whether the method should return a json-tree or just a simple string
-     * @param schema ... if given (not null), the json file will be validated
-     * @return either the json-tree for the given property or a simple string
-     * @throws IOException
-     * @throws ValidationException
+     * used to save the settings file (json-file)
+     * @param path the path to the json file
+     * @param schemaPath the path to the schema file
+     * @param jsonString the jsonString that should be written into the file
+     * @return whether writing (to the file) was successful or not
+     * @throws IOException thrown if the json file cannot be parsed
+     * @throws ValidationException thrown if the json file is not valid ACCORDING TO THE SCHEMA
      */
-    public static Object getProperty(Path path, String propertyPath, boolean isObject, Path schema) throws IOException, ValidationException {
-        if(schema != null){
-            if(!validate(path, schema)){
-                return null;
-            }
-        }
-
+    public static boolean saveSettings(Path path, Path schemaPath, String jsonString) throws IOException, ValidationException {
         JsonMapper mapper = new JsonMapper();
-        JsonNode node = mapper.readTree(path.toFile());
+        boolean valid = validate(jsonString, mapper.readTree(schemaPath.toFile()).toPrettyString());
 
-        String[] properties = propertyPath.split("\\.");
-
-        for(String p : properties){
-            if(p.matches("^[0-9]+$")){
-                int i = Integer.parseInt(p);
-                if(node.has(i)){
-                    node = node.get(i);
-                }
-            }else{
-                if(node.has(p)){
-                    node = node.get(p);
-                }else{
-                    return null;
-                }
-            }
-
+        if(valid){
+            mapper.writeValue(path.toFile(), mapper.readTree(jsonString).toPrettyString()); // write in pretty format
+            System.out.println(">> Settings file successfully written.");
         }
-
-        return isObject ? node : node.asText();
+        return valid;
     }
+
+
 
 
 
