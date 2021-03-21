@@ -7,10 +7,13 @@ import at.termftp.backend.dao.ServerRepository;
 import at.termftp.backend.model.Server;
 import at.termftp.backend.model.ServerGroup;
 import at.termftp.backend.model.ServerGroupServer;
+import at.termftp.backend.model.User;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ServerService {
@@ -48,6 +51,61 @@ public class ServerService {
     public void updateServer(Server server){
         server = serverRepository.save(server);
         System.out.println("> Updated Server");
+    }
+
+
+    public boolean removeServerFromServerGroup(UUID serverID, ServerGroup serverGroup){
+        ServerGroupServer serverGroupServer = serverGroup.getServerGroupServers()
+                .stream()
+                .filter(sgs -> sgs.getServer().getServerID().equals(serverID))
+                .findFirst().orElse(null);
+
+        if(serverGroupServer != null){
+            serverGroupServerRepository.delete(serverGroupServer);
+            System.out.println(">> removed 1 server from serverGroup");
+        }
+
+        return serverGroupServer != null;
+    }
+
+
+    public boolean removeServerGroup(User user, UUID groupID){
+
+        List<ServerGroup> serverGroups = getAllServerGroupsForUser(user.getUserID());
+        ServerGroup serverGroup = serverGroups.stream()
+                .filter(sg -> sg.getGroupID().equals(groupID))
+                .findFirst().orElse(null);
+
+        if(serverGroup != null){
+            serverGroupRepository.delete(serverGroup);
+            System.out.println(">> removed 1 serverGroup");
+        }
+
+        return serverGroup != null;
+
+    }
+
+    public void removeServerGroupServer(List<ServerGroup> serverGroups, UUID serverID){
+        for(ServerGroup serverGroup : serverGroups){
+            removeServerFromServerGroup(serverID, serverGroup);
+
+            if(serverGroup.getServerGroups().size() > 0){
+                removeServerGroupServer(new ArrayList<>(serverGroup.getServerGroups()), serverID);
+            }
+        }
+    }
+
+    public boolean removeServer(User user, UUID serverID){
+        Server server = serverRepository.findServerByServerID(serverID).orElse(null);
+        if(server != null){
+
+            List<ServerGroup> serverGroups = getAllServerGroupsForUser(user.getUserID());
+            removeServerGroupServer(serverGroups, serverID);
+
+            serverRepository.delete(server);
+            System.out.println(">> removed 1 Server.");
+        }
+        return server != null;
     }
 
 

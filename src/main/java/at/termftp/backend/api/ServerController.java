@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @RequestMapping("api/v1")
 @RestController
-@CrossOrigin(origins= "http://localhost:3000", methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD, RequestMethod.PUT})
+@CrossOrigin(origins= "http://localhost:3000", methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD, RequestMethod.PUT, RequestMethod.DELETE})
 public class ServerController {
 
     private final ServerService serverService;
@@ -56,9 +56,6 @@ public class ServerController {
             serverGroup.getServerGroups().addAll(serverGroups);
             serverService.updateChildGroups(serverGroup);
         }
-
-
-
 
         return DefaultResponse.createResponse(serverGroup, "Server-Group");
     }
@@ -158,6 +155,70 @@ public class ServerController {
 
         return DefaultResponse.createResponse(server, "Updated Server");
     }
+
+
+
+
+    @DeleteMapping(path = "/removeServerFromGroup")
+    public Object removeServerFromGroup(@RequestParam("serverID") UUID serverID,
+                                        @RequestParam("groupID") UUID groupID,
+                                        @RequestHeader("Access-Token") String token){
+
+        User user = accessTokenService.getUserByAccessToken(token);
+        if(user == null){
+            return ResponseEntity.status(401)
+                    .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
+        }
+
+        ServerGroup serverGroup = serverService.getServerGroupByID(groupID, user.getUserID());
+        boolean result = serverService.removeServerFromServerGroup(serverID, serverGroup);
+
+        if(!result){
+            return ResponseEntity.status(409).body(new DefaultResponse(409, "Conflict", "Invalid server or group! Please check if this group really contains this server!"));
+        }
+
+        return ResponseEntity.status(200).body(DefaultResponse.createResponse(true, "Removed 1 server from serverGroup."));
+    }
+
+
+    @DeleteMapping(path = "/removeGroup")
+    public Object removeGroup(@RequestHeader("Access-Token") String token,
+                              @RequestParam("groupID") UUID groupID){
+
+        User user = accessTokenService.getUserByAccessToken(token);
+        if(user == null){
+            return ResponseEntity.status(401)
+                    .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
+        }
+
+        boolean result = serverService.removeServerGroup(user, groupID);
+
+        if(!result){
+            return ResponseEntity.status(409).body(new DefaultResponse(409, "Conflict", "Invalid serverGroup!"));
+        }
+        return ResponseEntity.status(200).body(DefaultResponse.createResponse(true, "Removed 1 serverGroup."));
+    }
+
+
+    @DeleteMapping(path = "/removeServer")
+    public Object removeServer(@RequestHeader("Access-Token") String token,
+                               @RequestParam("serverID") UUID serverID){
+        User user = accessTokenService.getUserByAccessToken(token);
+        if(user == null){
+            return ResponseEntity.status(401)
+                    .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
+        }
+
+        boolean result = serverService.removeServer(user, serverID);
+
+        if(!result){
+            return ResponseEntity.status(409).body(new DefaultResponse(409, "Conflict", "Invalid server!"));
+        }
+        return ResponseEntity.status(200).body(DefaultResponse.createResponse(true, "Removed 1 server."));
+    }
+
+
+
 
     /**
      * used to get all ServerGroups of a user
