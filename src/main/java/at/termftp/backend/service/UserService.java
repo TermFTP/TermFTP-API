@@ -105,8 +105,6 @@ public class UserService {
         int aToken = accessTokenRepository.deleteByUserID(user.getUserID());
         System.out.println("-- Deleted " + aToken + " access token(s) for user: " + user);
 
-        // delete from other tables TODO
-
         return userRepository.deleteByUserID(user.getUserID());
     }
 

@@ -23,12 +23,12 @@ public class ServerGroup {
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false)
     private User user;
 
-    @OneToMany(mappedBy = "serverGroup", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "serverGroup", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private List<ServerGroupServer> serverGroupServers;
 
 
 
-    @OneToMany(mappedBy = "parentGroup", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "parentGroup", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private Set<ServerGroup> serverGroups = new HashSet<>();
 
     @ManyToOne

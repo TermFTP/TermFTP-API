@@ -37,7 +37,7 @@ public class Server {
     private LocalDate lastConnection;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "server")
+    @OneToMany(mappedBy = "server", cascade = CascadeType.REMOVE)
     private List<ServerGroupServer> serverGroupServers;
 
 

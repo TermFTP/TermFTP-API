@@ -28,7 +28,7 @@ public class User {
     private boolean verified;
 
     @JsonIgnore // preventing infinite recursion
-    @OneToMany(mappedBy = "user", targetEntity = ServerGroup.class)
+    @OneToMany(mappedBy = "user", targetEntity = ServerGroup.class, cascade = CascadeType.REMOVE)
     private List<ServerGroup> serverGroups;
 
 
