@@ -14,6 +14,8 @@ import java.util.UUID;
 @Service
 public class UserService {
 
+    // region <head>
+
     // The number of times a string should be hashed / should go through the process of hashing
     private static final int HASHING_DEPTH = 1000;
 
@@ -29,22 +31,9 @@ public class UserService {
         this.serverGroupRepository = serverGroupRepository;
     }
 
-    /**
-     * used to get a single user by and ID
-     *
-     * @param userID the User's ID
-     * @return the user or null
-     */
-    public User getUserById(UUID userID) {
-        return userRepository.findById(userID).orElse(null);
-    }
+    // endregion
 
-    /**
-     * @return a list of all users
-     */
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+    // region <util>
 
     /**
      * used to Hash a password using the SHA-256 algorithm (HASHING-DEPTH -times)
@@ -70,6 +59,10 @@ public class UserService {
         return new String(bytes, StandardCharsets.UTF_8).replace(new String(new byte[]{0x00}, StandardCharsets.UTF_8), "");
     }
 
+    // endregion
+
+    // region <create User>
+
     /**
      * used to create a user
      *
@@ -84,14 +77,9 @@ public class UserService {
         return user;
     }
 
-    /**
-     * used to get a user by username
-     *
-     * @return the user or null
-     */
-    public User getUserByName(String username) {
-        return userRepository.findUserByUsername(username).orElse(null);
-    }
+    // endregion
+
+    // region <delete User>
 
     /**
      * deletes an user by userID
@@ -107,5 +95,38 @@ public class UserService {
 
         return userRepository.deleteByUserID(user.getUserID());
     }
+
+    // endregion
+
+    // region <Get>
+
+    /**
+     * used to get a user by username
+     *
+     * @return the user or null
+     */
+    public User getUserByName(String username) {
+        return userRepository.findUserByUsername(username).orElse(null);
+    }
+
+
+    /**
+     * used to get a single user by and ID
+     *
+     * @param userID the User's ID
+     * @return the user or null
+     */
+    public User getUserById(UUID userID) {
+        return userRepository.findById(userID).orElse(null);
+    }
+
+    /**
+     * @return a list of all users
+     */
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    // endregion
 
 }

@@ -3,7 +3,6 @@ package at.termftp.backend.api;
 import at.termftp.backend.model.DefaultResponse;
 import at.termftp.backend.model.Login;
 import at.termftp.backend.service.AccessTokenService;
-import com.sun.istack.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +21,6 @@ public class AccessController {
 
     /**
      * This method returns an AccessToken or an Error if the login failed
-     * @param login
      * @return AccessToken or Error
      */
     @PostMapping(path = "/login")

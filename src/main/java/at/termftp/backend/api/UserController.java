@@ -21,6 +21,8 @@ import java.util.UUID;
 @CrossOrigin(origins= "http://localhost:3000", methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD, RequestMethod.PUT})
 public class UserController {
 
+    // region <head>
+
     private final UserService userService;
     private final AccessTokenService accessTokenService;
     private final ConfirmationTokenService confirmationTokenService;
@@ -34,37 +36,9 @@ public class UserController {
         this.emailSenderService = emailSenderService;
     }
 
+    // endregion
 
-    /**
-     * This method returns a user if the ID is correct, otherwise an error
-     * @param userID the ID of the user
-     * @return User
-     */
-    @GetMapping(path = "/getUser/{id}")
-    public Object getUserByID(@PathVariable("id") String userID){
-        UUID id;
-        try{
-            id = UUID.fromString(userID);
-        }catch (IllegalArgumentException ex){
-            return ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
-        }
-
-        User user = userService.getUserById(id);
-
-        return user != null ? DefaultResponse.createResponse(user, "user") : ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
-    }
-
-
-    /**
-     * This method returns a list of all users
-     * @return {@code List<User>}
-     */
-    @GetMapping(path = "/getUsers")
-    public Object getAllUsers(){
-        List<User> users = userService.getAllUsers();
-        return DefaultResponse.createResponse(users, "List of all Users");
-    }
-
+    // region <add User (register)>
 
     /**
      * This method creates and returns a new user, if email|username is duplicate -> error
@@ -105,20 +79,9 @@ public class UserController {
         return DefaultResponse.createResponse(createdUser, "Created User");
     }
 
-    /**
-     * Tis method verifies a user when he click the link in the email
-     * @param confirmationToken the ConfirmationToken
-     * @return true if the user was verified successfully
-     */
-    @GetMapping(path = "/confirm-account")
-    public Object verify(@RequestParam("token") String confirmationToken){
-        if(confirmationToken == null || confirmationToken.length() <= 0){
-            return false;
-        }
-        boolean result = confirmationTokenService.validate(confirmationToken);
-        return DefaultResponse.createResponse(result, "Verification");
-    }
+    // endregion
 
+    // region <delete User>
 
     /**
      * used to delete a single user by an ID
@@ -138,4 +101,59 @@ public class UserController {
             return ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
         }
     }
+
+    // endregion
+
+    // region <Get>
+
+    /**
+     * This method returns a user if the ID is correct, otherwise an error
+     * @param userID the ID of the user
+     * @return User
+     */
+    @GetMapping(path = "/getUser/{id}")
+    public Object getUserByID(@PathVariable("id") String userID){
+        UUID id;
+        try{
+            id = UUID.fromString(userID);
+        }catch (IllegalArgumentException ex){
+            return ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
+        }
+
+        User user = userService.getUserById(id);
+
+        return user != null ? DefaultResponse.createResponse(user, "user") : ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
+    }
+
+
+    /**
+     * This method returns a list of all users
+     * @return {@code List<User>}
+     */
+    @GetMapping(path = "/getUsers")
+    public Object getAllUsers(){
+        List<User> users = userService.getAllUsers();
+        return DefaultResponse.createResponse(users, "List of all Users");
+    }
+
+    // endregion
+
+    // region <confirm>
+
+    /**
+     * Tis method verifies a user when he click the link in the email
+     * @param confirmationToken the ConfirmationToken
+     * @return true if the user was verified successfully
+     */
+    @GetMapping(path = "/confirm-account")
+    public Object verify(@RequestParam("token") String confirmationToken){
+        if(confirmationToken == null || confirmationToken.length() <= 0){
+            return false;
+        }
+        boolean result = confirmationTokenService.validate(confirmationToken);
+        return DefaultResponse.createResponse(result, "Verification");
+    }
+
+    // endregion
+
 }

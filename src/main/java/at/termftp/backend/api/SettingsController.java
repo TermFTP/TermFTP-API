@@ -15,12 +15,19 @@ import java.nio.file.Paths;
 @RestController
 @CrossOrigin(origins= "http://localhost:3000", methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.HEAD, RequestMethod.PUT})
 public class SettingsController {
+
+    // region <head>
+
     private static final Path schema = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "settings_schema.json");
     private static final Path jsonFile = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "settings.json");
 
     @Autowired
     public SettingsController() {
     }
+
+    // endregion
+
+    // region <Get>
 
     /**
      * endpoint to retrieve the local settings file
@@ -36,6 +43,10 @@ public class SettingsController {
             return ResponseEntity.status(409).body(new DefaultResponse(409, "The local settings-file is INVALID!!!", e.getMessage()));
         }
     }
+
+    // endregion
+
+    // region <save/change settings>
 
     /**
      * endpoint to save settings into a local settings-file (json)
@@ -58,6 +69,6 @@ public class SettingsController {
         }
     }
 
-
+    // endregion
 
 }

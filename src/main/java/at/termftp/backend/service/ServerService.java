@@ -15,6 +15,9 @@ import java.util.UUID;
 
 @Service
 public class ServerService {
+
+    // region <head>
+
     private final ServerRepository serverRepository;
     private final ServerGroupRepository serverGroupRepository;
     private final ServerGroupServerRepository serverGroupServerRepository;
@@ -25,8 +28,9 @@ public class ServerService {
         this.serverGroupServerRepository = serverGroupServerRepository;
     }
 
+    // endregion
 
-    /*----------------- Remove -----------------*/
+    // region <remove>
 
     public boolean removeServerFromServerGroup(UUID serverID, ServerGroup serverGroup){
         ServerGroupServer serverGroupServer = serverGroup.getServerGroupServers()
@@ -82,10 +86,10 @@ public class ServerService {
         return server != null;
     }
 
+    // endregion
 
 
-
-    /*----------------- Create/Update/Add -----------------*/
+    // region <create/update/remove>
 
     /**
      * used to create a Server (or save/change a server)
@@ -164,11 +168,10 @@ public class ServerService {
         System.out.println("> updated ServerGroup " + serverGroup.getName() + " (updated Child-Groups)");
     }
 
+    // endregion
 
 
-
-    /*----------------- Get -----------------*/
-
+    // region <Get>
 
 
     /**
@@ -225,5 +228,6 @@ public class ServerService {
         return serverGroupRepository.findServerGroupByID(groupID, userID).orElse(null);
     }
 
+    // endregion
 
 }

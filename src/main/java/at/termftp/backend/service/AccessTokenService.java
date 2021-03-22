@@ -8,7 +8,6 @@ import at.termftp.backend.model.Login;
 import at.termftp.backend.model.User;
 import org.springframework.stereotype.Service;
 
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -74,6 +73,8 @@ public class AccessTokenService {
         return accessTokenRepository.save(accessToken);
     }
 
+    // region <Get>
+
     /**
      * This method returns a list of all access tokens
      * @return List of access tokens
@@ -95,5 +96,7 @@ public class AccessTokenService {
         }
         return null;
     }
+
+    // endregion
 
 }
