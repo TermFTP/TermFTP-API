@@ -88,10 +88,11 @@ public class UserService {
      * @return the number of deleted users
      */
     public int deleteUser(User user) {
-        int cToken = confirmationTokenRepository.deleteByUser(user.getUserID());
-        System.out.println("-- Deleted " + cToken + " confirmationToken for user: " + user);
-        int aToken = accessTokenRepository.deleteByUserID(user.getUserID());
-        System.out.println("-- Deleted " + aToken + " access token(s) for user: " + user);
+        System.out.println("user_id: " + user.getUserID());
+        confirmationTokenRepository.deleteByUser(user.getUserID());
+        System.out.println("-- Deleted confirmationToken(s) for user: " + user);
+        accessTokenRepository.deleteByUserID(user.getUserID());
+        System.out.println("-- Deleted access token(s) for user: " + user);
 
         return userRepository.deleteByUserID(user.getUserID());
     }

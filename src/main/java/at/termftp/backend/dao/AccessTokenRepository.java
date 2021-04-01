@@ -3,6 +3,7 @@ package at.termftp.backend.dao;
 import at.termftp.backend.model.AccessToken;
 import at.termftp.backend.model.AccessTokenID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -31,11 +32,11 @@ public interface AccessTokenRepository extends JpaRepository<AccessToken, Access
     /**
      * deletes all AccessTokens that are mapped to a user
      * @param userID the ID of the User
-     * @return the number of deleted AccessTokens
      */
+    @Modifying
     @Query(value = "DELETE FROM access_tokens WHERE user_id = ?1",
             nativeQuery = true)
-    int deleteByUserID(UUID userID);
+    void deleteByUserID(UUID userID);
 
 
     /**

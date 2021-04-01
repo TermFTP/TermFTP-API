@@ -242,7 +242,7 @@ public class ServerController {
             return ResponseEntity.status(409).body(new DefaultResponse(409, "Conflict", "Invalid server or group! Please check if this group really contains this server!"));
         }
 
-        return ResponseEntity.status(200).body(DefaultResponse.createResponse(true, "Removed 1 server from serverGroup."));
+        return DefaultResponse.createResponse(true, "Removed 1 server from serverGroup.");
     }
 
 
@@ -269,7 +269,7 @@ public class ServerController {
         if(!result){
             return ResponseEntity.status(409).body(new DefaultResponse(409, "Conflict", "Invalid serverGroup!"));
         }
-        return ResponseEntity.status(200).body(DefaultResponse.createResponse(true, "Removed 1 serverGroup."));
+        return DefaultResponse.createResponse(true, "Removed 1 serverGroup.");
     }
 
 
@@ -294,7 +294,7 @@ public class ServerController {
         if(!result){
             return ResponseEntity.status(409).body(new DefaultResponse(409, "Conflict", "Invalid server!"));
         }
-        return ResponseEntity.status(200).body(DefaultResponse.createResponse(true, "Removed 1 server."));
+        return DefaultResponse.createResponse(true, "Removed 1 server.");
     }
 
 
