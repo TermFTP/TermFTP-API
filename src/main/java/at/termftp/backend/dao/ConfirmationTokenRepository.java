@@ -3,6 +3,7 @@ package at.termftp.backend.dao;
 import at.termftp.backend.model.ConfirmationToken;
 import at.termftp.backend.model.ConfirmationTokenID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -27,9 +28,9 @@ public interface ConfirmationTokenRepository extends JpaRepository<ConfirmationT
     /**
      * deletes all ConfirmationTokens that are mapped to a user
      * @param userID :UUID the ID of the User
-     * @return the number of deleted ConfirmationTokens
      */
+    @Modifying
     @Query(value = "DELETE FROM confirmation_tokens WHERE user_id = ?1",
             nativeQuery = true)
-    int deleteByUser(UUID userID);
+    void deleteByUser(UUID userID);
 }
