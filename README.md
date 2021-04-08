@@ -20,6 +20,8 @@ The general request path is as follows: `<ip>:<port>/api/v1`
 - [GET: `api/v1/confirm-account`](#confirm-account)
 - [DELETE: `api/v1/deleteUser`](#delete-user)
 - [DELETE: `api/v1/deleteUser/{id}`](#delete-user-as-admin)
+- [POST: `api/v1/connection`](#save-connection)
+- [GET: `api/v1/connections`](#get-connections)
 - [Other Endpoints](#other-endpoints)
 
 ### Register
@@ -316,8 +318,8 @@ This endpoint is used to update a single server.
   {
       "serverID" : "39957cfc-54e9-4347-939f-c976df1ff289",
       "ip" : "127.0.0.11",
-      "ftpPort" : "21",
-      "sshPort" : "22",
+      "ftpPort" : 21,
+      "sshPort" : 22,
       "username" : "admin",
       "password" : "nowthereisastrongerpw"
   }
@@ -485,15 +487,18 @@ This endpoint is used to delete a single `User`
 This endpoint also deletes a user whereas it should only be used for debugging
 
 - URI: `api/v1/deleteUser/{id}`
+
 - Type: `DELETE`
+
 - Headers:
 
   - `Access-Token` : `<access-token>`
     - Temp root AT
+  
 - Path Variables
-  
-- `id`: the id of the user to be deleted
-  
+
+  - `id`: the id of the user to be deleted
+
 - Response-Body: `DefaulRespone` with status
 
   ```json
@@ -506,14 +511,111 @@ This endpoint also deletes a user whereas it should only be used for debugging
 
 
 
+### Save Connection
+
+This endpoint saves a connection (aka `HistoryItem`)
+
+- URI: `api/v1/connection`
+
+- Type: `POST`
+
+- Headers:
+
+  - `Access-Token` : `<access-token>`
+
+- Request-Body:  `HistoryItem`
+
+  ```json
+  {
+      "device" : "my private pc",
+      "ip" : "127.0.0.25",
+      "sshPort" : 22,
+      "ftpPort" : 21,
+      "username" : "admin"
+  }
+  ```
+
+- Response-Body: `DefaultResponse` with the saved `HistoryItem`
+
+  ```json
+  {
+      "status": 200,
+      "message": "Saved HistoryItem (=Connection)",
+      "data": {
+          "historyItemID": {
+              "userID": "2a2cac53-056b-4cac-af29-756fdfefcf21",
+              "when": "2021-04-08T14:14:02.930337"
+          },
+          "device": "my private pc",
+          "ip": "127.0.0.25",
+          "deleted": false,
+          "sshPort": 22,
+          "ftpPort": 21,
+          "username": "admin"
+      }
+  }
+  ```
+
+  
+
+### Get Connections
+
+This endpoint returns the complete history of a user's connections.
+
+- URI: `api/v1/connections`
+
+- Type: `GET`
+
+- Headers:
+
+  - `Access-Token` : `<access-token>`
+
+- Response-Body: `DefaultResponse` with the history (list of `HistoryItem`)
+
+  ```json
+  {
+      "status": 200,
+      "message": "List of Connections (HistoryItems) aka 'vErLaUf'",
+      "data": [
+          {
+              "historyItemID": {
+                  "userID": "2a2cac53-056b-4cac-af29-756fdfefcf21",
+                  "when": "2021-04-08T14:14:02.930337"
+              },
+              "device": "my private pc",
+              "ip": "127.0.0.25",
+              "deleted": false,
+              "sshPort": 22,
+              "ftpPort": 21,
+              "username": "admin"
+          },
+          {
+              "historyItemID": {
+                  "userID": "2a2cac53-056b-4cac-af29-756fdfefcf21",
+                  "when": "2021-04-08T14:19:33.108154"
+              },
+              "device": "my other pc",
+              "ip": "127.0.0.26",
+              "deleted": false,
+              "sshPort": 22,
+              "ftpPort": 21,
+              "username": "admin"
+          }
+      ]
+  }
+  ```
+
+
+
+
+
+
+
+
 ### Other Endpoints
 
 - `GET` : `api/v1/getUser/{id}`
 - `GET` : `api/v1/getUsers`
-- `PUT` : `api/v1/connection`
-  - (history)
-- `GET` : `api/v1/connections`
-  - (history)
 - `GET` : `api/v1/settings`
 - `POST` : `api/v1/settings`
 
