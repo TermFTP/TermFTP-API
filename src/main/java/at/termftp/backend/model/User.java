@@ -61,7 +61,6 @@ public class User {
                 "userID=" + userID +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
                 ", verified=" + verified +
                 ", serverGroups=" + serverGroups +
                 '}';

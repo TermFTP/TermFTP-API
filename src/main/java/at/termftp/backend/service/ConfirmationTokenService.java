@@ -4,9 +4,11 @@ import at.termftp.backend.dao.ConfirmationTokenRepository;
 import at.termftp.backend.dao.UserRepository;
 import at.termftp.backend.model.ConfirmationToken;
 import at.termftp.backend.model.User;
+import at.termftp.backend.utils.CustomLogger;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.logging.Level;
 
 @Service
 public class ConfirmationTokenService {
@@ -24,7 +26,9 @@ public class ConfirmationTokenService {
      * @return the confirmation token
      */
     public ConfirmationToken createAndGetConfirmationToken(User user){
-        return confirmationTokenRepository.save(new ConfirmationToken(user));
+        ConfirmationToken confirmationToken = confirmationTokenRepository.save(new ConfirmationToken(user));
+        CustomLogger.logDefault("created confirmation token for user: " + user.getUsername());
+        return confirmationToken;
     }
 
     /**
@@ -33,14 +37,15 @@ public class ConfirmationTokenService {
      * @return true if the token is valid
      */
     public boolean validate(String token){
+        CustomLogger.logDefault("validating confirmation token...");
         ConfirmationToken confirmationToken = confirmationTokenRepository.findConfirmationTokenByToken(token).orElse(null);
         if(confirmationToken == null){
+            CustomLogger.logCustom(1, Level.WARNING, "confirmation token does not match");
             return false;
         }
-        if(!confirmationToken.getConfirmationTokenID().getToken().equals(token)){
-            return false;
-        }
+
         if(!confirmationToken.getValidUntil().isAfter(LocalDate.now())){
+            CustomLogger.logCustom(1, Level.WARNING, "confirmation token is no longer valid");
             return false;
         }
 
@@ -48,6 +53,7 @@ public class ConfirmationTokenService {
         if(user != null){
             user.setVerified(true);
             userRepository.save(user);
+            CustomLogger.logCustom(1, Level.INFO, "successfully verified user");
             return true;
         }
 

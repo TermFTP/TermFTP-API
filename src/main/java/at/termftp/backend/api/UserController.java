@@ -6,6 +6,7 @@ import at.termftp.backend.service.AccessTokenService;
 import at.termftp.backend.service.ConfirmationTokenService;
 import at.termftp.backend.service.EmailSenderService;
 import at.termftp.backend.service.UserService;
+import at.termftp.backend.utils.CustomLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +15,10 @@ import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 @RequestMapping("api/v1")
 @RestController
@@ -73,16 +76,20 @@ public class UserController {
                     message.contains("u_username")
                             ? ErrorMessages.getDuplicateUsername()
                             : ErrorMessages.getDuplicateEmail()));
+
         }catch(MailSendException ex){
             String message = "User created but email could not be sent: " + ex.getMostSpecificCause().getMessage();
+            CustomLogger.logCustom(0, Level.WARNING, message);
             Object[] data = {createdUser, message};
             return ResponseEntity.status(409)
                     .body(new DefaultResponse(409, "Conflict", data));
+
         }catch(MailAuthenticationException ex){
             String message = "User created but email could not be sent " +
                     "(bad credentials or unauthenticated sender service - termftp@gmail.com): "
                     + ex.getMostSpecificCause().getMessage();
             Object[] data = {createdUser, message};
+            CustomLogger.logCustom(0, Level.SEVERE, message + createdUser);
             return ResponseEntity.status(500)
                     .body(new DefaultResponse(409, "Internal Server Error", data));
         }
