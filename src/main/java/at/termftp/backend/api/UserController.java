@@ -9,6 +9,7 @@ import at.termftp.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.web.bind.annotation.*;
@@ -77,6 +78,13 @@ public class UserController {
             Object[] data = {createdUser, message};
             return ResponseEntity.status(409)
                     .body(new DefaultResponse(409, "Conflict", data));
+        }catch(MailAuthenticationException ex){
+            String message = "User created but email could not be sent " +
+                    "(bad credentials or unauthenticated sender service - termftp@gmail.com): "
+                    + ex.getMostSpecificCause().getMessage();
+            Object[] data = {createdUser, message};
+            return ResponseEntity.status(500)
+                    .body(new DefaultResponse(409, "Internal Server Error", data));
         }
         return DefaultResponse.createResponse(createdUser, "Created User");
     }

@@ -1,6 +1,7 @@
 package at.termftp.backend.service;
 
 
+import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -20,7 +21,7 @@ public class EmailSenderService {
      * @param email SimpleMailMessage
      */
     @Async
-    public void sendEmail(SimpleMailMessage email){
+    public void sendEmail(SimpleMailMessage email) throws MailAuthenticationException {
         javaMailSender.send(email);
     }
 
