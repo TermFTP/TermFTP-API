@@ -35,4 +35,11 @@ public class CustomLogger {
     public static void logDefault(String logMessage){
         logger.log(Level.INFO, logMessage);
     }
+
+    public static void logError(String logMessage){
+        logger.log(Level.SEVERE, logMessage);
+    }
+    public static void logWarning(String logMessage){
+        logger.log(Level.WARNING, logMessage);
+    }
 }

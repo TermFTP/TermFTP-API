@@ -15,7 +15,6 @@ import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -110,6 +109,7 @@ public class UserController {
     public Object deleteUserAsAdmin(@PathVariable("id") String userID,
                                     @RequestHeader("Access-Token") String token){
         if(!token.equals(TEMP_SECRET_ROOT_AT)){
+            CustomLogger.logWarning("Access-Token does not match!");
             return ResponseEntity.status(401)
                     .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
         }
@@ -119,8 +119,10 @@ public class UserController {
             id = UUID.fromString(userID);
             User user = userService.getUserById(id);
             int deletedUsers = userService.deleteUser(user);
+            CustomLogger.logDefault("deleted user: " + user.getUsername());
             return DefaultResponse.createResponse(deletedUsers, "Deleted Users");
         }catch (IllegalArgumentException ex){
+            CustomLogger.logWarning(ErrorMessages.getInvalidUserID());
             return ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
         }
     }
@@ -134,15 +136,17 @@ public class UserController {
     public Object deleteUser(@RequestHeader("Access-Token") String token){
         User user = accessTokenService.getUserByAccessToken(token);
         if(user == null){
+            CustomLogger.logWarning("invalid access-token");
             return ResponseEntity.status(401)
                     .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
         }
 
         try{
             int deletedUsers = userService.deleteUser(user);
-            System.out.println("- Deleted User " + user.getUsername());
+            CustomLogger.logDefault("deleted user: " + user.getUsername());
             return DefaultResponse.createResponse(deletedUsers, "Deleted User");
         }catch (IllegalArgumentException ex){
+            CustomLogger.logWarning(ErrorMessages.getInvalidUserID());
             return ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
         }
     }
@@ -158,13 +162,14 @@ public class UserController {
      */
     @GetMapping(path = "/getUser/{id}")
     public Object getUserByID(@PathVariable("id") String userID){
+        CustomLogger.logDefault("getting user by ID: " + userID);
         UUID id;
         try{
             id = UUID.fromString(userID);
         }catch (IllegalArgumentException ex){
+            CustomLogger.logWarning(ErrorMessages.getInvalidUserID());
             return ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
         }
-
         User user = userService.getUserById(id);
 
         return user != null ? DefaultResponse.createResponse(user, "user") : ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
@@ -178,6 +183,7 @@ public class UserController {
     @GetMapping(path = "/getUsers")
     public Object getAllUsers(){
         List<User> users = userService.getAllUsers();
+        CustomLogger.logDefault("getting all users");
         return DefaultResponse.createResponse(users, "List of all Users");
     }
 
