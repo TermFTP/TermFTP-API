@@ -43,17 +43,17 @@ ALTER TABLE public.users
 
 CREATE TABLE public.settings
 (
-    setting_id integer NOT NULL DEFAULT nextval('"Setting_setting_id_seq"'::regclass),
     user_id uuid NOT NULL,
-    font_size character varying(10) COLLATE pg_catalog."default",
-    CONSTRAINT "Setting_pkey" PRIMARY KEY (setting_id, user_id),
-    CONSTRAINT f_user_id FOREIGN KEY (user_id)
+    setting_id character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    value character varying COLLATE pg_catalog."default",
+    CONSTRAINT settings_pkey PRIMARY KEY (user_id, setting_id),
+    CONSTRAINT settings_user_id_fkey FOREIGN KEY (user_id)
         REFERENCES public.users (user_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
 
-TABLESPACE pg_default;
+    TABLESPACE pg_default;
 
 ALTER TABLE public.settings
     OWNER to postgres;
