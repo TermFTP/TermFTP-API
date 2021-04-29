@@ -22,6 +22,9 @@ The general request path is as follows: `<ip>:<port>/api/v1`
 - [DELETE: `api/v1/deleteUser/{id}`](#delete-user-as-admin)
 - [POST: `api/v1/connection`](#save-connection)
 - [GET: `api/v1/connections`](#get-connections)
+- [GET: `api/v1/settings`](#get-settings)
+- [POST: `api/v1/settings`](#save-or-change-settings)
+- [DELETE: `api/v1/deleteSettings`](#delete-settings)
 - [Other Endpoints](#other-endpoints)
 
 ### Register
@@ -607,6 +610,130 @@ This endpoint returns the complete history of a user's connections.
 
 
 
+### Settings
+
+#### Get Settings
+
+This endpoint returns all settings of one user.
+
+- URI: `api/v1/settings`
+
+- Type: `GET`
+
+- Headers:
+
+  - `Access-Token` : `<access-token>`
+
+- Response-Body: `DefaultResponse` with the list of `SimpleSetting`s
+
+  ```json
+  {
+      "status": 200,
+      "message": "All settings for user u1",
+      "data": [
+          {
+              "settingID": "key2",
+              "value": "value2"
+          },
+          {
+              "settingID": "key1",
+              "value": "value1"
+          }
+      ]
+  }
+  ```
+
+#### Save or Change Settings
+
+This endpoint saves - or if they already exist, updates - the given settings
+
+- URI: `api/v1/settings`
+
+- Type: `POST`
+
+- Headers:
+
+  - `Access-Token` : `<access-token>`
+
+- Request-Body: `List<SimpleSetting>`
+
+  ```json
+  [
+      {
+          "settingID" : "key1",
+          "value" : "value1"
+      },
+       {
+          "settingID" : "key2",
+          "value" : "value2"
+      }
+  ]
+  ```
+
+  
+
+- Response-Body: `DefaultResponse` with the list of `SimpleSetting`s
+
+  ```json
+  {
+      "status": 200,
+      "message": "Saved 2 settings.",
+      "data": [
+          {
+              "settingID": {
+                  "userID": "ce210960-b092-42e6-9e37-4edc288e17e2",
+                  "settingID": "key1"
+              },
+              "value": "value1"
+          },
+          {
+              "settingID": {
+                  "userID": "ce210960-b092-42e6-9e37-4edc288e17e2",
+                  "settingID": "key2"
+              },
+              "value": "value2"
+          }
+      ]
+  }
+  ```
+
+
+
+#### Delete Settings
+
+This endpoint deletes the given settings identified by their key (``settingID`). If a setting with the given ID does not exist, it will be ignored.
+
+- URI: `api/v1/deleteSettings`
+
+- Type: `DELETE`
+
+- Headers:
+
+  - `Access-Token` : `<access-token>`
+
+- Request-Body: `List<String>` (list of keys)
+
+  ```json
+  [
+      "key1",
+      "key3"
+  ]
+  ```
+
+  
+
+- Response-Body: `DefaultResponse` with the number of deleted settings.
+
+  ```json
+  {
+      "status": 200,
+      "message": "Deleted Settings for user u1",
+      "data": 1
+  }
+  ```
+
+
+
 
 
 
@@ -616,9 +743,6 @@ This endpoint returns the complete history of a user's connections.
 
 - `GET` : `api/v1/getUser/{id}`
 - `GET` : `api/v1/getUsers`
-- `GET` : `api/v1/settings`
-- `POST` : `api/v1/settings`
-
 
 
 

@@ -31,6 +31,10 @@ public class User {
     @OneToMany(mappedBy = "user", targetEntity = ServerGroup.class, cascade = CascadeType.REMOVE)
     private List<ServerGroup> serverGroups;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", targetEntity = Setting.class, cascade = CascadeType.REFRESH)
+    private List<Setting> settings;
+
 
     public User(UUID userID, String username, String email, String password, boolean verified, List<ServerGroup> serverGroups) {
         this.userID = userID;
@@ -143,5 +147,13 @@ public class User {
 
     public void setServerGroups(List<ServerGroup> serverGroups) {
         this.serverGroups = serverGroups;
+    }
+
+    public List<Setting> getSettings() {
+        return settings;
+    }
+
+    public void setSettings(List<Setting> settings) {
+        this.settings = settings;
     }
 }
