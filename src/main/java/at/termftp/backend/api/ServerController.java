@@ -151,6 +151,12 @@ public class ServerController {
                     .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
         }
 
+        if(server.getFtpType() == null || !FtpType.getTypesAsList().contains(server.getFtpType())){
+            return ResponseEntity.status(400)
+                    .body(new DefaultResponse(400, "Bad Request", "Please enter a correct FTP Type: "
+                            + FtpType.getTypesAsList()));
+        }
+
         ServerGroup serverGroup = serverService.getServerGroupForUserByName(user.getUserID(), "default");
         server = serverService.createServer(server);
         serverService.addServerToServerGroup(server, serverGroup);
@@ -225,6 +231,11 @@ public class ServerController {
             CustomLogger.logWarning("HistoryItem.ip must not be null!");
             return ResponseEntity.status(401)
                     .body(new DefaultResponse(400, "Bad Request", "HistoryItem.ip must not be null!"));
+        }
+        if(historyItem.getFtpType() == null || !FtpType.getTypesAsList().contains(historyItem.getFtpType())){
+            return ResponseEntity.status(400)
+                    .body(new DefaultResponse(400, "Bad Request", "Please enter a correct FTP Type: "
+                            + FtpType.getTypesAsList()));
         }
 
         // set ID and save
