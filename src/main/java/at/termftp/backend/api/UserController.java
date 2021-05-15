@@ -123,42 +123,6 @@ public class UserController {
 
     // endregion
 
-    // region <Get>
-
-    /**
-     * This method returns a user if the ID is correct, otherwise an error
-     * @param userID the ID of the user
-     * @return User
-     */
-    @GetMapping(path = "/getUser/{id}")
-    public Object getUserByID(@PathVariable("id") String userID){
-        CustomLogger.logDefault("getting user by ID: " + userID);
-        UUID id;
-        try{
-            id = UUID.fromString(userID);
-        }catch (IllegalArgumentException ex){
-            CustomLogger.logWarning(ErrorMessages.getInvalidUserID());
-            return ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
-        }
-        User user = userService.getUserById(id);
-
-        return user != null ? DefaultResponse.createResponse(user, "user") : ResponseEntity.status(400).body(new DefaultResponse(400, "Bad Request", ErrorMessages.getInvalidUserID()));
-    }
-
-
-    /**
-     * This method returns a list of all users
-     * @return {@code List<User>}
-     */
-    @GetMapping(path = "/getUsers")
-    public Object getAllUsers(){
-        List<User> users = userService.getAllUsers();
-        CustomLogger.logDefault("getting all users");
-        return DefaultResponse.createResponse(users, "List of all Users");
-    }
-
-    // endregion
-
     // region <confirm>
 
     /**
