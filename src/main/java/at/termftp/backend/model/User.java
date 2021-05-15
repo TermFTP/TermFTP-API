@@ -2,6 +2,7 @@ package at.termftp.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
 
 import javax.persistence.*;
 import java.util.List;
@@ -124,7 +125,7 @@ public class User {
         this.email = email;
     }
 
-    @JsonIgnore
+//    @JsonIgnore
     public String getPassword() {
         return password;
     }
