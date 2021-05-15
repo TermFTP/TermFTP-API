@@ -14,6 +14,14 @@ ALTER TABLE public.ftp_types
     OWNER to postgres;
 
 
+
+INSERT INTO ftp_types (type) VALUES ('FTP');
+INSERT INTO ftp_types (type) VALUES ('SFTP');
+INSERT INTO ftp_types (type) VALUES ('FTPS');
+
+
+
+
 -- SEQUENCE: public."Setting_setting_id_seq"
 
 -- DROP SEQUENCE public."Setting_setting_id_seq";
