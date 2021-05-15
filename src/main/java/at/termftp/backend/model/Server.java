@@ -36,6 +36,9 @@ public class Server {
     @Column(name = "last_connection")
     private LocalDate lastConnection;
 
+    @Column(name = "ftp_type")
+    private String ftpType;
+
     @JsonIgnore
     @OneToMany(mappedBy = "server", cascade = CascadeType.REMOVE)
     private List<ServerGroupServer> serverGroupServers;
@@ -48,7 +51,8 @@ public class Server {
                   @JsonProperty("lastConnection") LocalDate lastConnection,
                   @JsonProperty("name") String name,
                   @JsonProperty("username") String username,
-                  @JsonProperty("password") String password) {
+                  @JsonProperty("password") String password,
+                  @JsonProperty("ftpType") String ftpType) {
         if(serverID == null){
             serverID = UUID.randomUUID();
         }
@@ -60,6 +64,7 @@ public class Server {
         this.name = name;
         this.username = username;
         this.password = password;
+        this.ftpType = ftpType;
     }
 
     public Server(String ip) {
@@ -84,7 +89,8 @@ public class Server {
                 ", name='" + name + '\'' +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
-                ", lastConnection=" + lastConnection +
+                ", lastConnection=" + lastConnection + '\'' +
+                ", ftpType=" + ftpType +
                 '}';
     }
 
@@ -104,6 +110,7 @@ public class Server {
         if (password != null ? !password.equals(server.password) : server.password != null) return false;
         if (lastConnection != null ? !lastConnection.equals(server.lastConnection) : server.lastConnection != null)
             return false;
+        if (ftpType != null ? !ftpType.equals(server.ftpType) : server.ftpType != null) return false;
         return serverGroupServers != null ? serverGroupServers.equals(server.serverGroupServers) : server.serverGroupServers == null;
     }
 
@@ -117,6 +124,7 @@ public class Server {
         result = 31 * result + (username != null ? username.hashCode() : 0);
         result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (lastConnection != null ? lastConnection.hashCode() : 0);
+        result = 31 * result + (ftpType != null ? ftpType.hashCode() : 0);
         result = 31 * result + (serverGroupServers != null ? serverGroupServers.hashCode() : 0);
         return result;
     }
@@ -193,5 +201,13 @@ public class Server {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getFtpType() {
+        return ftpType;
+    }
+
+    public void setFtpType(String ftpType) {
+        this.ftpType = ftpType;
     }
 }

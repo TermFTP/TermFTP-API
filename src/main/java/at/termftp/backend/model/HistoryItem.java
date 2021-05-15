@@ -37,6 +37,9 @@ public class HistoryItem {
     @Column(name = "username")
     private String username;
 
+    @Column(name = "ftp_type")
+    private String ftpType;
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false)
@@ -49,7 +52,7 @@ public class HistoryItem {
                        boolean deleted,
                        int sshPort,
                        int ftpPort,
-                       String username, User user) {
+                       String username, User user, String ftpType) {
         this.historyItemID = new HistoryItemID(user.getUserID(), when);
         this.device = device;
         this.ip = ip;
@@ -58,6 +61,7 @@ public class HistoryItem {
         this.ftpPort = ftpPort;
         this.username = username;
         this.user = user;
+        this.ftpType = ftpType;
     }
 
     public HistoryItem() {
@@ -74,6 +78,7 @@ public class HistoryItem {
                 ", sshPort=" + sshPort +
                 ", ftpPort=" + ftpPort +
                 ", username='" + username + '\'' +
+                ", ftpType='" + ftpType + '\'' +
                 '}';
     }
 
@@ -89,21 +94,26 @@ public class HistoryItem {
         if (ftpPort != that.ftpPort) return false;
         if (historyItemID != null ? !historyItemID.equals(that.historyItemID) : that.historyItemID != null)
             return false;
+        if (when_transient != null ? !when_transient.equals(that.when_transient) : that.when_transient != null)
+            return false;
         if (device != null ? !device.equals(that.device) : that.device != null) return false;
         if (ip != null ? !ip.equals(that.ip) : that.ip != null) return false;
         if (username != null ? !username.equals(that.username) : that.username != null) return false;
+        if (ftpType != null ? !ftpType.equals(that.ftpType) : that.ftpType != null) return false;
         return user != null ? user.equals(that.user) : that.user == null;
     }
 
     @Override
     public int hashCode() {
         int result = historyItemID != null ? historyItemID.hashCode() : 0;
+        result = 31 * result + (when_transient != null ? when_transient.hashCode() : 0);
         result = 31 * result + (device != null ? device.hashCode() : 0);
         result = 31 * result + (ip != null ? ip.hashCode() : 0);
         result = 31 * result + (deleted ? 1 : 0);
         result = 31 * result + sshPort;
         result = 31 * result + ftpPort;
         result = 31 * result + (username != null ? username.hashCode() : 0);
+        result = 31 * result + (ftpType != null ? ftpType.hashCode() : 0);
         result = 31 * result + (user != null ? user.hashCode() : 0);
         return result;
     }
@@ -183,5 +193,13 @@ public class HistoryItem {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getFtpType() {
+        return ftpType;
+    }
+
+    public void setFtpType(String ftpType) {
+        this.ftpType = ftpType;
     }
 }

@@ -6,4 +6,5 @@ DROP TABLE public.server_groups;
 DROP TABLE public.servers;
 DROP TABLE public.settings;
 DROP TABLE public.users;
+DROP TABLE public.ftp_types;
 DROP SEQUENCE public."Setting_setting_id_seq";
