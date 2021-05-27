@@ -70,7 +70,6 @@ public class UserService {
      * @return the user
      */
     public User createUser(User user) {
-
         user.setPassword(hashPassword(user.getPassword()));
         user = userRepository.save(user);
         CustomLogger.logDefault("created user: " + user.getUsername());
