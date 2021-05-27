@@ -7,8 +7,11 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -20,8 +23,11 @@ import java.util.UUID;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class UserTest extends BackendApplicationTests{
+@AutoConfigureMockMvc
+public class UserTest{
 
+    @Autowired
+    private MockMvc mockMvc;
 
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -51,10 +57,17 @@ public class UserTest extends BackendApplicationTests{
     }
 
 
-    private void register(User user) throws Exception {
+    public void register(User user) throws Exception {
+
+        String body = "{\n" +
+                "    \"username\" : \"%s\",\n" +
+                "    \"password\" : \"%s\",\n" +
+                "    \"email\" : \"%s\"\n" +
+                "}";
+        body = String.format(body, user.getUsername(), user.getPassword(), user.getEmail());
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/api/v1/register")
-                .content(mapper.writeValueAsString(user))
+                .content(body)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8.name()))
@@ -69,36 +82,43 @@ public class UserTest extends BackendApplicationTests{
     @Order(2)
     public void testLogin() throws Exception {
         String body = "{ \"username\" : \"%s\", \"password\" : \"%s\" }";
+        loginMany(body);
+    }
+
+    public void loginMany(String body) throws Exception {
 
         for(String user : USER_NAMES){
             String requestBody = String.format(body, user, user);
-
-            MvcResult result = mockMvc.perform(MockMvcRequestBuilders
-                    .post("/api/v1/login")
-                    .content(requestBody)
-                    .header("PC-Name", "private-pc")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .characterEncoding(StandardCharsets.UTF_8.name()))
-                    .andExpect(MockMvcResultMatchers.status().isOk())
-                    .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200))
-                    .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("AccessToken"))
-                    .andExpect(MockMvcResultMatchers.jsonPath("$.data.accessTokenID.token").isNotEmpty())
-                    .andExpect(MockMvcResultMatchers.jsonPath("$.data.validUntil").isNotEmpty())
-                    .andExpect(MockMvcResultMatchers.jsonPath("$.data.pcName").isNotEmpty())
-                    .andReturn();
-
-
-            JsonNode node = mapper.readTree(result.getResponse().getContentAsString());
-            String at = node.get("data").get("accessTokenID").get("token").asText();
+            String at = login(requestBody);
             System.out.println(at);
             accessTokens.add(at);
         }
     }
 
+    public String login(String requestBody) throws Exception {
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders
+                .post("/api/v1/login")
+                .content(requestBody)
+                .header("PC-Name", "private-pc")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .characterEncoding(StandardCharsets.UTF_8.name()))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("AccessToken"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.accessTokenID.token").isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.validUntil").isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.pcName").isNotEmpty())
+                .andReturn();
+
+        JsonNode node = mapper.readTree(result.getResponse().getContentAsString());
+        return node.get("data").get("accessTokenID").get("token").asText();
+    }
+
+
     @Test
     @Order(3)
-    void testDeleteUser() throws Exception {
+    public void testDeleteUser() throws Exception {
         for(String at : accessTokens){
             mockMvc.perform(MockMvcRequestBuilders
                     .delete("/api/v1/deleteUser")

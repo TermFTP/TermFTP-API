@@ -10,8 +10,6 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class BackendApplicationTests {
 
-	@Autowired
-	protected MockMvc mockMvc;
 
 	@Test
 	void contextLoads() {
