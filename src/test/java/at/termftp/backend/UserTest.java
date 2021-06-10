@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@SpringBootTest
+//@SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureMockMvc
 public class UserTest{
@@ -39,7 +39,7 @@ public class UserTest{
     private static final List<String> accessTokens = new ArrayList<>();
 
 
-    @Test
+//    @Test
     @Order(1)
     public void testRegister() throws Exception{
 
@@ -78,7 +78,7 @@ public class UserTest{
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.userID").isNotEmpty());
     }
 
-    @Test
+//    @Test
     @Order(2)
     public void testLogin() throws Exception {
         String body = "{ \"username\" : \"%s\", \"password\" : \"%s\" }";
@@ -116,7 +116,7 @@ public class UserTest{
     }
 
 
-    @Test
+//    @Test
     @Order(3)
     public void testDeleteUser() throws Exception {
         for(String at : accessTokens){
