@@ -2,6 +2,7 @@ package at.termftp.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
 
 import javax.persistence.*;
 import java.util.List;
@@ -30,6 +31,10 @@ public class User {
     @JsonIgnore // preventing infinite recursion
     @OneToMany(mappedBy = "user", targetEntity = ServerGroup.class, cascade = CascadeType.REMOVE)
     private List<ServerGroup> serverGroups;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", targetEntity = Setting.class, cascade = CascadeType.REFRESH)
+    private List<Setting> settings;
 
 
     public User(UUID userID, String username, String email, String password, boolean verified, List<ServerGroup> serverGroups) {
@@ -61,7 +66,6 @@ public class User {
                 "userID=" + userID +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
                 ", verified=" + verified +
                 ", serverGroups=" + serverGroups +
                 '}';
@@ -144,5 +148,13 @@ public class User {
 
     public void setServerGroups(List<ServerGroup> serverGroups) {
         this.serverGroups = serverGroups;
+    }
+
+    public List<Setting> getSettings() {
+        return settings;
+    }
+
+    public void setSettings(List<Setting> settings) {
+        this.settings = settings;
     }
 }

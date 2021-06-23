@@ -3,6 +3,7 @@ package at.termftp.backend.service;
 import at.termftp.backend.dao.*;
 import at.termftp.backend.model.ServerGroup;
 import at.termftp.backend.model.User;
+import at.termftp.backend.utils.CustomLogger;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -69,11 +70,14 @@ public class UserService {
      * @return the user
      */
     public User createUser(User user) {
-
         user.setPassword(hashPassword(user.getPassword()));
         user = userRepository.save(user);
+        CustomLogger.logDefault("created user: " + user.getUsername());
+
         serverGroupRepository.save(new ServerGroup("default", user));
         serverGroupRepository.save(new ServerGroup("favourites", user));
+        CustomLogger.logDefault("created 2 serverGroups (default, favourites) for user: " + user.getUsername());
+
         return user;
     }
 

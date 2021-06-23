@@ -1,3 +1,27 @@
+-- Table: public.ftp_types
+
+-- DROP TABLE public.ftp_types;
+
+CREATE TABLE public.ftp_types
+(
+    type character varying(5) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT ftp_types_pkey PRIMARY KEY (type)
+)
+
+    TABLESPACE pg_default;
+
+ALTER TABLE public.ftp_types
+    OWNER to postgres;
+
+
+
+INSERT INTO ftp_types (type) VALUES ('FTP');
+INSERT INTO ftp_types (type) VALUES ('SFTP');
+INSERT INTO ftp_types (type) VALUES ('FTPS');
+
+
+
+
 -- SEQUENCE: public."Setting_setting_id_seq"
 
 -- DROP SEQUENCE public."Setting_setting_id_seq";
@@ -43,17 +67,17 @@ ALTER TABLE public.users
 
 CREATE TABLE public.settings
 (
-    setting_id integer NOT NULL DEFAULT nextval('"Setting_setting_id_seq"'::regclass),
     user_id uuid NOT NULL,
-    font_size character varying(10) COLLATE pg_catalog."default",
-    CONSTRAINT "Setting_pkey" PRIMARY KEY (setting_id, user_id),
-    CONSTRAINT f_user_id FOREIGN KEY (user_id)
+    setting_id character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    value character varying COLLATE pg_catalog."default",
+    CONSTRAINT settings_pkey PRIMARY KEY (user_id, setting_id),
+    CONSTRAINT settings_user_id_fkey FOREIGN KEY (user_id)
         REFERENCES public.users (user_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
 
-TABLESPACE pg_default;
+    TABLESPACE pg_default;
 
 ALTER TABLE public.settings
     OWNER to postgres;
@@ -75,7 +99,13 @@ CREATE TABLE public.servers
     name character varying(255) COLLATE pg_catalog."default",
     username character varying(255) COLLATE pg_catalog."default",
     password character varying(255) COLLATE pg_catalog."default",
-    CONSTRAINT servers_pkey PRIMARY KEY (server_id)
+    ftp_type character varying(5) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT servers_pkey PRIMARY KEY (server_id),
+    CONSTRAINT servers_ftp_type_fkey FOREIGN KEY (ftp_type)
+        REFERENCES public.ftp_types (type) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
 )
 
     TABLESPACE pg_default;
@@ -158,11 +188,17 @@ CREATE TABLE public.history_items
     ssh_port integer,
     ftp_port integer,
     username character varying(255) COLLATE pg_catalog."default",
+    ftp_type character varying(5) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT history_items_pkey PRIMARY KEY (user_id, "when"),
     CONSTRAINT f_user_id FOREIGN KEY (user_id)
         REFERENCES public.users (user_id) MATCH SIMPLE
         ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT history_items_ftp_type_fkey FOREIGN KEY (ftp_type)
+        REFERENCES public.ftp_types (type) MATCH SIMPLE
+        ON UPDATE NO ACTION
         ON DELETE NO ACTION
+        NOT VALID
 )
 
     TABLESPACE pg_default;

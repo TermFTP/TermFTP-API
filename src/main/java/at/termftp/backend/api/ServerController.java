@@ -5,6 +5,7 @@ import at.termftp.backend.service.AccessTokenService;
 import at.termftp.backend.service.HistoryItemService;
 import at.termftp.backend.service.ServerService;
 import at.termftp.backend.service.UserService;
+import at.termftp.backend.utils.CustomLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @RequestMapping("api/v1")
@@ -52,6 +54,7 @@ public class ServerController {
             List<UUID> serverIDs = group.getServers().stream().map(UUID::fromString).collect(Collectors.toList());
             List<Server> servers = serverIDs.stream().map(serverService::getServerById).collect(Collectors.toList());
             serverGroup = serverService.addServersToServerGroup(servers, serverGroup);
+            CustomLogger.logCustom(2, Level.INFO, "added " + servers.size() + " servers to serverGroup: " + serverGroup.getName());
         }
 
         // add ServerGroups (children) to a Parent-ServerGroup
@@ -61,6 +64,8 @@ public class ServerController {
 
             serverGroup.getServerGroups().addAll(serverGroups);
             serverService.updateChildGroups(serverGroup);
+
+            CustomLogger.logCustom(2, Level.INFO, "added " + serverGroups.size() + " (child-) serverGroups to serverGroup: " + serverGroup.getName());
         }
 
         return DefaultResponse.createResponse(serverGroup, "Server-Group");
@@ -76,12 +81,16 @@ public class ServerController {
     @PostMapping(path = "/group")
     public Object grouping(@RequestBody Group group,
                            @RequestHeader("Access-Token") String token){
+
         // validate AccessToken
         User user = accessTokenService.getUserByAccessToken(token);
         if(user == null){
+            CustomLogger.logCustom(0, Level.WARNING, "/group: Invalid Access-Token");
             return ResponseEntity.status(401)
                     .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
         }
+
+        CustomLogger.logDefault("/group: " + user.getUsername());
 
         // do grouping
         try{
@@ -89,23 +98,28 @@ public class ServerController {
                 // new empty group
                 ServerGroup serverGroup = new ServerGroup(group.getName(), user);
                 serverGroup = serverService.saveServerGroup(serverGroup);
+
+                CustomLogger.logCustom(1, Level.INFO, "created new empty group: " + serverGroup.getName());
+
                 return groupServers(group, serverGroup, user.getUserID());
 
             }else{
                 UUID groupID = UUID.fromString(group.getGroupID());
                 ServerGroup serverGroup = serverService.getServerGroupByID(groupID);
+                CustomLogger.logCustom(1, Level.INFO, "changing server group: " + serverGroup.getName());
 
                 // change the name of the group, if required
                 if(group.getName() != null){
                     serverGroup.setName(group.getName());
 
                     serverGroup = serverService.saveServerGroup(serverGroup);
-                    System.out.println(serverGroup);
+                    CustomLogger.logCustom(2, Level.INFO, "changing name of the server group to: " + serverGroup.getName());
                 }
                 return groupServers(group, serverGroup, user.getUserID());
             }
         }catch(IllegalArgumentException e){
             String message = e.getMessage().contains("Child-Group") ? "; " + e.getMessage() : "";
+            CustomLogger.logWarning(message);
             return ResponseEntity.status(400)
                     .body(new DefaultResponse(400, "Bad Request", "Invalid Server-IDs (must be of type UUID!)" + message));
         }
@@ -132,13 +146,22 @@ public class ServerController {
         // validate AT
         User user = accessTokenService.getUserByAccessToken(token);
         if(user == null){
+            CustomLogger.logCustom(0, Level.WARNING, "/createServer: Invalid Access-Token");
             return ResponseEntity.status(401)
                     .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
+        }
+
+        if(server.getFtpType() == null || !FtpType.getTypesAsList().contains(server.getFtpType())){
+            return ResponseEntity.status(400)
+                    .body(new DefaultResponse(400, "Bad Request", "Please enter a correct FTP Type: "
+                            + FtpType.getTypesAsList()));
         }
 
         ServerGroup serverGroup = serverService.getServerGroupForUserByName(user.getUserID(), "default");
         server = serverService.createServer(server);
         serverService.addServerToServerGroup(server, serverGroup);
+
+        CustomLogger.logDefault("created server: " + server.getName() + " (and added to serverGroup default)");
 
         return DefaultResponse.createResponse(server, "Created Server");
     }
@@ -156,18 +179,21 @@ public class ServerController {
         // validate AT
         User user = accessTokenService.getUserByAccessToken(token);
         if(user == null){
+            CustomLogger.logCustom(0, Level.WARNING, "/updateServer: Invalid Access-Token");
             return ResponseEntity.status(401)
                     .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
         }
 
         if(serverService.getServerById(server.getServerID()) == null){
+            String message = "Invalid serverID! This server does not exist yet. " +
+                    "If you want to create a new Server please use `api/v1/createServer`";
+            CustomLogger.logWarning(message);
             return ResponseEntity.status(400)
-                    .body(new DefaultResponse(400, "Bad Request", "Invalid serverID! This server does not exist yet. " +
-                            "If you want to create a new Server please use `api/v1/createServer`"));
+                    .body(new DefaultResponse(400, "Bad Request", message));
         }
 
         serverService.updateServer(server);
-
+        CustomLogger.logDefault("updated server: " + server.getName());
 
         return DefaultResponse.createResponse(server, "Updated Server");
     }
@@ -190,23 +216,32 @@ public class ServerController {
         LocalDateTime timestamp = LocalDateTime.now();
         User user = accessTokenService.getUserByAccessToken(token);
         if(user == null){
+            CustomLogger.logCustom(0, Level.WARNING, "/connection: Invalid Access-Token");
             return ResponseEntity.status(401)
                     .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
         }
 
         // check for NOT NULL fields
         if(historyItem.getDevice() == null){
+            CustomLogger.logWarning("HistoryItem.device must not be null!");
             return ResponseEntity.status(401)
                     .body(new DefaultResponse(400, "Bad Request", "HistoryItem.device must not be null!"));
         }
         if(historyItem.getIp() == null){
+            CustomLogger.logWarning("HistoryItem.ip must not be null!");
             return ResponseEntity.status(401)
                     .body(new DefaultResponse(400, "Bad Request", "HistoryItem.ip must not be null!"));
+        }
+        if(historyItem.getFtpType() == null || !FtpType.getTypesAsList().contains(historyItem.getFtpType())){
+            return ResponseEntity.status(400)
+                    .body(new DefaultResponse(400, "Bad Request", "Please enter a correct FTP Type: "
+                            + FtpType.getTypesAsList()));
         }
 
         // set ID and save
         historyItem.setID(user.getUserID(), timestamp);
         historyItem = historyItemService.saveHistoryItem(historyItem);
+        CustomLogger.logDefault("Saved HistoryItem (=Connection)");
 
         return DefaultResponse.createResponse(historyItem, "Saved HistoryItem (=Connection)");
     }
@@ -231,6 +266,7 @@ public class ServerController {
 
         User user = accessTokenService.getUserByAccessToken(token);
         if(user == null){
+            CustomLogger.logCustom(0, Level.WARNING, "/removeServerFromGroup: Invalid Access-Token");
             return ResponseEntity.status(401)
                     .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
         }
@@ -239,9 +275,11 @@ public class ServerController {
         boolean result = serverService.removeServerFromServerGroup(serverID, serverGroup);
 
         if(!result){
+            CustomLogger.logWarning("Invalid server or group! Please check if this group really contains this server!");
             return ResponseEntity.status(409).body(new DefaultResponse(409, "Conflict", "Invalid server or group! Please check if this group really contains this server!"));
         }
 
+        CustomLogger.logDefault("Removed 1 server from serverGroup.");
         return DefaultResponse.createResponse(true, "Removed 1 server from serverGroup.");
     }
 
@@ -260,6 +298,7 @@ public class ServerController {
 
         User user = accessTokenService.getUserByAccessToken(token);
         if(user == null){
+            CustomLogger.logCustom(0, Level.WARNING, "/removeGroup: Invalid Access-Token");
             return ResponseEntity.status(401)
                     .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
         }
@@ -269,6 +308,7 @@ public class ServerController {
         if(!result){
             return ResponseEntity.status(409).body(new DefaultResponse(409, "Conflict", "Invalid serverGroup!"));
         }
+        CustomLogger.logDefault("Removed 1 serverGroup.");
         return DefaultResponse.createResponse(true, "Removed 1 serverGroup.");
     }
 
@@ -285,6 +325,7 @@ public class ServerController {
                                @RequestParam("serverID") UUID serverID){
         User user = accessTokenService.getUserByAccessToken(token);
         if(user == null){
+            CustomLogger.logCustom(0, Level.WARNING, "/removeServer: Invalid Access-Token");
             return ResponseEntity.status(401)
                     .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
         }
@@ -292,8 +333,10 @@ public class ServerController {
         boolean result = serverService.removeServer(user, serverID);
 
         if(!result){
+            CustomLogger.logWarning("Invalid server!");
             return ResponseEntity.status(409).body(new DefaultResponse(409, "Conflict", "Invalid server!"));
         }
+        CustomLogger.logDefault("Removed 1 server.");
         return DefaultResponse.createResponse(true, "Removed 1 server.");
     }
 
@@ -314,6 +357,7 @@ public class ServerController {
     public Object getServerGroups(@RequestHeader("Access-Token") String token){
         User user = accessTokenService.getUserByAccessToken(token);
         if(user == null){
+            CustomLogger.logCustom(0, Level.WARNING, "/serverGroups: Invalid Access-Token");
             return ResponseEntity.status(401)
                     .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
         }
@@ -332,6 +376,7 @@ public class ServerController {
     public Object getConnections(@RequestHeader("Access-Token") String token){
         User user = accessTokenService.getUserByAccessToken(token);
         if(user == null){
+            CustomLogger.logCustom(0, Level.WARNING, "/connections: Invalid Access-Token");
             return ResponseEntity.status(401)
                     .body(new DefaultResponse(401, "Unauthorized", "Invalid Access-Token"));
         }
